@@ -550,7 +550,7 @@ MA_ex<-function(Aux_Tt,init,Z,Y,PhiC,num_run=1000,burn_in=500,thin=1){
     }
     print(c(i,rate,alfa,theta))
   }
-  OUT<-list(phi=sto.phi,theta=sto.theta,Tt=Tt[1,],Ptau=Ptau)
+  OUT<-list(phi=sto.phi,theta=sto.theta,Tt=Tt[1,],Ptau=Ptau,time=sto.time,Ptau_fenmu=numr/fenzi_o)
   return(OUT)
 }
 
@@ -559,10 +559,12 @@ MA_ex<-cmpfun(MA_ex)
 Result<-MA_ex(MA_aux_out,init,Z,Y,PhiC,num_run=100000,burn_in=0,thin=10)
 
 
-RR<-data.frame(phi_ten=Result$phi[,10],phi_one=Result$phi[,1],theta=Result$theta)
-TauPro<-data.frame(Tt=Result$Tt,Ptau=Result$Ptau)
+RR<-data.frame(phi_ten=Result$phi[,10],phi_one=Result$phi[,1],theta=Result$theta,time=Result$time)
+TauPro<-data.frame(Tt=Result$Tt,Ptau=Result$Ptau_fenmu)
 write.csv(RR,paste("Result_",task_id,".csv",sep = ""))
 write.csv(TauPro,paste("TauProbability_",task_id,".csv",sep = ""))
+
+
 
 
 
