@@ -216,11 +216,12 @@ p_inv<-function(t,phi,phist,wst){
   p_inv_inp<-cbind(phist,wst)
   inp_in<-dim(p_inv_inp)[2]-1
   psi<-function(x){
-    outtt<-(py(Y,t,x[1:inp_in])-log(x[inp_in+1]))*sign(identical(as.vector(x[1:inp_in]),phi))
+    outtt<-sign(identical(as.vector(x[1:inp_in]),phi))
     return(outtt)
   }
-  out<-sum(apply(p_inv_inp,MARGIN = 1,FUN=psi))
-  return(out)
+  out<-which(apply(p_inv_inp,MARGIN = 1,FUN=psi)==1)
+  outtt<-as.numeric(py(Y,t,p_inv_inp[out,][1:inp_in])-log(p_inv_inp[out,][inp_in+1]))
+  return(outtt)
 }
 
 #proposal sampling for t and phi
@@ -283,11 +284,14 @@ MA_in<-function(H,W,n,pai,n_trun){
 
 MA_in<-cmpfun(MA_in)
 
+Digset<-c(3,4,10)
 sig_dig<-10                   #significant digit used to round t for high efficiency.
+#sig_dig<-Digset[task_id]
 
 GRset<-seq(1,10,0.5)          #initial value set for separate chain
 
 #construct sufficient auxiliary set
+#init<-list(theta=2,phi=rep(2,N),tau=2,t=2,I=1) 
 init<-list(theta=GRset[task_id],phi=rep(GRset[task_id],N),tau=task_id,t=2,I=1)          #tau and t should be inversed vector.
 MA_aux<-function(init,Z,Y,PhiC,num_run=1000,burn_in=500){
   theta<-init$theta
@@ -310,11 +314,11 @@ MA_aux<-function(init,Z,Y,PhiC,num_run=1000,burn_in=500){
       j<-i-burn_in
       InR<-MA_in(H,W,n=i,pai,n_trun)
       W<-InR$W
-      H$t<-round(InR$t,digits = sig_dig)
+      H$t<-InR$t
       H$I<-InR$I
       n_trun<-InR$n_trun
       
-      ColH$t<-InR$t
+      ColH$t<-round(InR$t,digits = sig_dig)
       ColH$I<-InR$I
       ColH$w<-W[InR$I]
       #calculate sampling frequency
@@ -418,11 +422,11 @@ MA_ex<-function(Aux_Tt,init,Z,Y,PhiC,num_run=1000,burn_in=500,thin=1){
     if((i<=burn_in)|(i%%thin!=0)){
       InR<-MA_in(H,W,n=i+InRadd,pai,n_trun)
       W<-InR$W
-      H$t<-round(InR$t,digits = sig_dig)
+      H$t<-InR$t
       H$I<-InR$I
       n_trun<-InR$n_trun
       
-      ColH$t<-InR$t
+      ColH$t<-round(InR$t,digits = sig_dig)
       ColH$I<-InR$I
       ColH$w<-W[InR$I]
       #calculate sampling frequency
@@ -477,11 +481,11 @@ MA_ex<-function(Aux_Tt,init,Z,Y,PhiC,num_run=1000,burn_in=500,thin=1){
       earlier_time<-Sys.time()
       InR<-MA_in(H,W,n=i+InRadd,pai,n_trun)
       W<-InR$W
-      H$t<-round(InR$t,digits = sig_dig)
+      H$t<-InR$t
       H$I<-InR$I
       n_trun<-InR$n_trun
       
-      ColH$t<-InR$t
+      ColH$t<-round(InR$t,digits = sig_dig)
       ColH$I<-InR$I
       ColH$w<-W[InR$I]
       #calculate sampling frequency
@@ -559,8 +563,6 @@ RR<-data.frame(phi_ten=Result$phi[,10],phi_one=Result$phi[,1],theta=Result$theta
 TauPro<-data.frame(Tt=Result$Tt,Ptau=Result$Ptau)
 write.csv(RR,paste("Result_",task_id,".csv",sep = ""))
 write.csv(TauPro,paste("TauProbability_",task_id,".csv",sep = ""))
-
-
 
 
 
