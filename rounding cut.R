@@ -80,7 +80,7 @@ MAux<-cmpfun(MAux)     #byte compile
 
 
 # #standardise element of phi
-# Phistar<-MAux(init,Z,Y,num_run=5000,burn_in=0,thin=1,r=0.01)
+# Phistar<-MAux(init,Z,num_run=5000,burn_in=0,thin=1)
 # da<-apply(Phistar,max,MARGIN = 1)
 # xi<-apply(Phistar,min,MARGIN = 1)
 # p<-cbind(Phistar,da,xi)
