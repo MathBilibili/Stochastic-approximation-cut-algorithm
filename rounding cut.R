@@ -29,7 +29,7 @@ px<-function(phi,Z){
 #unnormalizing density2 Y|theta&phi \times theta
 py<-function(Y,theta,phi){
   PbY<-rbind(phi,Y)
-  out<-log(1/theta+mean(phi)/n)+sum(apply(PbY,FUN=function(x){log((1/sqrt(theta+x[1]/n))*exp(-(x[2]^2)/(2*(theta+x[1]/n))))},MARGIN = 2))
+  out<-log(1/(theta+mean(phi)/n))+sum(apply(PbY,FUN=function(x){log((1/sqrt(theta+x[1]/n))*exp(-(x[2]^2)/(2*(theta+x[1]/n))))},MARGIN = 2))
   return(out)
 }
 
