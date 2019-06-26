@@ -17,7 +17,8 @@ for(i in 1:N){
   }
 }
 
-
+d_x<-1       # dimension of theta
+d_y<-N       # dimension of phi
 
 #density 1 Z|phi \times phi
 px<-function(phi,Z){
@@ -52,7 +53,7 @@ rprox<-function(phi){
 
 
 #Choice of Auxiliary Parameter Set chain
-init<-list(phi=rep(1,N))
+init<-list(phi=rep(1,d_y))
 MAux<-function(init,Z,num_run=1000,burn_in=500,thin=1){
   phi<-init$phi
   sto.phi<-as.matrix(rep(phi,((num_run-burn_in)/thin))) #note the dimension of phi
@@ -241,7 +242,14 @@ MA_in<-cmpfun(MA_in)
 
 Digset<-c(3,4,10)
 #sig_dig<-10                   #significant digit used to round t for high efficiency.
-sig_dig<-Digset[task_id]
+if(d_x==1){
+  sig_dig<-Digset[task_id]
+}else{
+  sig_dig<-rep(0,d_x)
+  for(s in 1:d_x){
+    sig_dig[s]<-Digset[task_id,s]       #multiple setting of presicion parameter.
+  }
+}
 
 GRset<-seq(1,10,0.5)          #initial value set for separate chain
 
@@ -249,8 +257,8 @@ GRset<-seq(1,10,0.5)          #initial value set for separate chain
 
 
 #construct sufficient auxiliary set
-#init<-list(theta=2,phi=rep(2,N),t=2,I=1) 
-init<-list(theta=GRset[task_id],phi=rep(GRset[task_id],N),t=2,I=1)          #t should be inversed vector.
+#init<-list(theta=2,phi=rep(2,d_y),t=2,I=1) 
+init<-list(theta=rep(GRset[task_id],d_x),phi=rep(GRset[task_id],d_y),t=2,I=1)          #t should be inversed vector.
 MA_aux<-function(init,Z,Y,PhiC,num_run=1000,burn_in=500){
   theta<-init$theta
   phi<-init$phi
@@ -333,7 +341,7 @@ MA_aux<-function(init,Z,Y,PhiC,num_run=1000,burn_in=500){
         theta_n<-runif(1,min=tau_n-5*10^(-sig_dig-1),max=tau_n+5*10^(-sig_dig-1))  #uniformly drawing \theta
       }else{
         for(q in 1:length(tau_n)){
-          theta_n[q]<-runif(1,min=tau_n[q]-5*10^(-sig_dig-1),max=tau_n[q]+5*10^(-sig_dig-1))
+          theta_n[q]<-runif(1,min=tau_n[q]-5*10^(-sig_dig[q]-1),max=tau_n[q]+5*10^(-sig_dig[q]-1))
         }
       }
       rate<-px(phi_n,Z)+prox(phi,phi_n)-px(phi,Z)-prox(phi_n,phi)
@@ -437,7 +445,7 @@ MA_ex<-function(Aux_Tt,init,Z,Y,PhiC,num_run=1000,burn_in=500,thin=1){
         theta_n<-runif(1,min=tau_n-5*10^(-sig_dig-1),max=tau_n+5*10^(-sig_dig-1))  #uniformly drawing \theta
       }else{
         for(q in 1:length(tau_n)){
-          theta_n[q]<-runif(1,min=tau_n[q]-5*10^(-sig_dig-1),max=tau_n[q]+5*10^(-sig_dig-1))
+          theta_n[q]<-runif(1,min=tau_n[q]-5*10^(-sig_dig[q]-1),max=tau_n[q]+5*10^(-sig_dig[q]-1))
         }
       }
       rate<-px(phi_n,Z)+prox(phi,phi_n)-px(phi,Z)-prox(phi_n,phi)
@@ -499,7 +507,7 @@ MA_ex<-function(Aux_Tt,init,Z,Y,PhiC,num_run=1000,burn_in=500,thin=1){
         theta_n<-runif(1,min=tau_n-5*10^(-sig_dig-1),max=tau_n+5*10^(-sig_dig-1))  #uniformly drawing \theta
       }else{
         for(q in 1:length(tau_n)){
-          theta_n[q]<-runif(1,min=tau_n[q]-5*10^(-sig_dig-1),max=tau_n[q]+5*10^(-sig_dig-1))
+          theta_n[q]<-runif(1,min=tau_n[q]-5*10^(-sig_dig[q]-1),max=tau_n[q]+5*10^(-sig_dig[q]-1))
         }
       }
       rate<-px(phi_n,Z)+prox(phi,phi_n)-px(phi,Z)-prox(phi_n,phi)
