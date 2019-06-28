@@ -35,7 +35,7 @@ py<-function(Y,theta,phi){
 
 #proposal 1
 prox<-function(phi_n,phi){
-  out<-sum(log(dtruncnorm(phi_n, a=0, b=Inf, mean = phi, sd = 0.1))) 
+  out<-sum(log(dtruncnorm(phi_n, a=0, b=100, mean = phi, sd = 0.1))) 
   return(out) 
 }
 
@@ -44,7 +44,7 @@ prox<-function(phi_n,phi){
 
 #proposal 1 samling function
 rprox<-function(phi){
-  out<-rtruncnorm(1, a=0, b=Inf, mean = phi, sd = 0.1)
+  out<-rtruncnorm(1, a=0, b=100, mean = phi, sd = 0.1)
   return(out)
 }
 
@@ -185,7 +185,7 @@ pro_tp<-function(P,pro_tp_inp){
   phi<-pro_tp_inp$phi
   ran<-runif(1,0,1)
   if(ran<P){
-    t_n<-rtruncnorm(1,a=0, b=Inf,mean = t,sd=0.1)      #proposal for t may be changed
+    t_n<-rtruncnorm(1,a=0, b=100,mean = t,sd=0.1)      #proposal for t may be changed
     out<-list(t=t_n,phi=phi)
   }else{
     phi_n<-PhiC[sample(seq(1,dim(PhiC)[1]),1),]  
@@ -203,7 +203,7 @@ dpro_tp<-function(P,x_n,x){
   if(identical(t,t_n)){
     out<-1/(dim(PhiC)[1])*(1-P)
   }else{
-    out<-dtruncnorm(t_n,a=0, b=Inf,mean = t,sd=0.1)*P        #proposal for t may be changed
+    out<-dtruncnorm(t_n,a=0, b=100,mean = t,sd=0.1)*P        #proposal for t may be changed
   }
   return(out)
 }
