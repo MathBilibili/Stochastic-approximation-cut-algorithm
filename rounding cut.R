@@ -307,7 +307,7 @@ MA_aux<-function(init,Z,Y,PhiC,num_run=1000,burn_in=500){
         
         if(Count_Tt==dim(Tt)[2]){
           iidentical<-function(x){
-            return(identical(x,ColH$t))
+            return(identical(x,as.numeric(ColH$t)))
           }
           if(dim(Tt)[2]>1){
             log.fenzi_n<-apply(Tt,FUN = log.fenzi,MARGIN = 2)  
@@ -412,7 +412,7 @@ MA_ex<-function(Aux_Tt,init,Z,Y,PhiC,num_run=1000,burn_in=500,thin=1){
       
       if(Count_Tt==dim(Tt)[2]){
         iidentical<-function(x){
-          return(identical(x,ColH$t))
+          return(identical(x,as.numeric(ColH$t)))
         }
         if(dim(Tt)[2]>1){
           log.fenzi_n<-apply(Tt,FUN = log.fenzi,MARGIN = 2)  
@@ -474,7 +474,7 @@ MA_ex<-function(Aux_Tt,init,Z,Y,PhiC,num_run=1000,burn_in=500,thin=1){
       
       if(Count_Tt==dim(Tt)[2]){
         iidentical<-function(x){
-          return(identical(x,ColH$t))
+          return(identical(x,as.numeric(ColH$t)))
         }
         if(dim(Tt)[2]>1){
           log.fenzi_n<-apply(Tt,FUN = log.fenzi,MARGIN = 2)  
