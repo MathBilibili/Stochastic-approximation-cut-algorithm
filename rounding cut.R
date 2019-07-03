@@ -109,7 +109,7 @@ MAux<-cmpfun(MAux)     #byte compile
 #    }
 #     Y<-Phi[Ac,]
 #     d<-dist2(X,Y)
-#     mi<-apply(d,min,MARGIN = 1)
+#     mi<-apply(d,min,MARGIN = 2)
 #     A[i]<-Ac[which.max(mi)]
 #     Ac<-ind[!ind%in%A]
 #   }
@@ -155,7 +155,7 @@ MMP<-function(Phi,num_sel=100){
      }
      Y<-Phi[Ac,]
      d<-dist2(X,Y)
-     mi<-apply(d,min,MARGIN = 1)
+     mi<-apply(d,min,MARGIN = 2)
      A[i]<-Ac[which.max(mi)]
      Ac<-ind[!ind%in%A]
   }
