@@ -1,4 +1,4 @@
-library(spatstat)
+library(flexclust)
 library(compiler)
 library(truncnorm)
 #data specification
@@ -103,11 +103,9 @@ MAux<-cmpfun(MAux)     #byte compile
 #   A<-sample(ind,size=1)
 #   Ac<-ind[!ind%in%A]
 #   for(i in 2:num_sel){
-#     X<-Phi[A,1]
-#     Y<-Phi[A,2]
-#     x2<-Phi[Ac,1]
-#     y2<-Phi[Ac,2]
-#     d<-crossdist(X,Y,x2,y2)
+#     X<-Phi[A,]
+#     Y<-Phi[Ac,]
+#     d<-dist2(X,Y)
 #     mi<-apply(d,min,MARGIN = 1)
 #     A[i]<-Ac[which.max(mi)]
 #     Ac<-ind[!ind%in%A]
@@ -148,14 +146,12 @@ MMP<-function(Phi,num_sel=100){
   A<-sample(ind,size=1)
   Ac<-ind[!ind%in%A]
   for(i in 2:num_sel){
-    X<-Phi[A,1]
-    Y<-Phi[A,2]
-    x2<-Phi[Ac,1]
-    y2<-Phi[Ac,2]
-    d<-crossdist(X,Y,x2,y2)
-    mi<-apply(d,min,MARGIN = 1)
-    A[i]<-Ac[which.max(mi)]
-    Ac<-ind[!ind%in%A]
+     X<-Phi[A,]
+     Y<-Phi[Ac,]
+     d<-dist2(X,Y)
+     mi<-apply(d,min,MARGIN = 1)
+     A[i]<-Ac[which.max(mi)]
+     Ac<-ind[!ind%in%A]
   }
   return(A)
 }
