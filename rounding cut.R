@@ -104,6 +104,9 @@ MAux<-cmpfun(MAux)     #byte compile
 #   Ac<-ind[!ind%in%A]
 #   for(i in 2:num_sel){
 #     X<-Phi[A,]
+#     if(is.vector(X)){
+#      X<-t(as.matrix(X))
+#    }
 #     Y<-Phi[Ac,]
 #     d<-dist2(X,Y)
 #     mi<-apply(d,min,MARGIN = 1)
@@ -147,6 +150,9 @@ MMP<-function(Phi,num_sel=100){
   Ac<-ind[!ind%in%A]
   for(i in 2:num_sel){
      X<-Phi[A,]
+     if(is.vector(X)){
+       X<-t(as.matrix(X))
+     }
      Y<-Phi[Ac,]
      d<-dist2(X,Y)
      mi<-apply(d,min,MARGIN = 1)
