@@ -568,7 +568,7 @@ MA_ex<-function(Aux_Tt,init,Z,Y,PhiC,num_run=1000,burn_in=500,thin=1){
       Tem_out<-list(phi=sto.phi[1:((i-burn_in)/thin),],theta=sto.theta[1:((i-burn_in)/thin),],time=sto.time[1:((i-burn_in)/thin)],Tt=Tt[1,],log.Ptau_fenmu=log.numr-log.fenzi_o)
       Tem_RR<-data.frame(phi_ten= Tem_out$phi[,10],phi_one= Tem_out$phi[,1],theta= Tem_out$theta,time= Tem_out$time)
       write.csv(Tem_RR,paste("Result_",task_id,".csv",sep = ""))
-      Tem_Pr<-data.frame(Tt=Tem_out$Tt,Ptau=Tem_out$Ptau_fenmu)
+      Tem_Pr<-data.frame(Tt=Tem_out$Tt,Ptau=Tem_out$log.Ptau_fenmu)
       write.csv(Tem_Pr,paste("TauProbability_",task_id,".csv",sep = ""))
     }
     print(c(i,rate,alfa,theta))
@@ -583,6 +583,6 @@ Result<-MA_ex(MA_aux_out,init,Z,Y,PhiC,num_run=100000,burn_in=0,thin=10)
 
 
 RR<-data.frame(phi_ten=Result$phi[,10],phi_one=Result$phi[,1],theta=Result$theta,time=Result$time)
-TauPro<-data.frame(Tt=Result$Tt,Ptau=Result$Ptau_fenmu)
+TauPro<-data.frame(Tt=Result$Tt,Ptau=Result$log.Ptau_fenmu)
 write.csv(RR,paste("Result_",task_id,".csv",sep = ""))
 write.csv(TauPro,paste("TauProbability_",task_id,".csv",sep = ""))
