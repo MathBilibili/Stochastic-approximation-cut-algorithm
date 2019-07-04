@@ -333,10 +333,10 @@ MA_aux<-function(init,Z,Y,PhiC,num_run=1000,burn_in=500){
       
       phi_n<-rprox(phi)
       if(j==1){
-        deno<-bas[2]*exp(py(Y,ColH$t,phi_n)-py(Y,ColH$t,PhiC[bas[1],]))
-        numr<-bas[2]*exp(py(Y,ColH$t,phi_n)-py(Y,ColH$t,PhiC[bas[1],]))
+        log.deno<-log(bas[2])+py(Y,ColH$t,phi_n)-py(Y,ColH$t,PhiC[bas[1],])
+        log.numr<-log(bas[2])+py(Y,ColH$t,phi_n)-py(Y,ColH$t,PhiC[bas[1],])
         log.fenzi_o<-py(Y,Tt,phi_n)
-        Ptau<-numr/deno
+        Ptau<-1
       }else{
          log.fenzi<-function(t){   
           return(py(Y,t,phi_n))
@@ -353,22 +353,24 @@ MA_aux<-function(init,Z,Y,PhiC,num_run=1000,burn_in=500){
           }
           
           nchan<-which(apply(Tt,FUN=iidentical,MARGIN = 2))
-          log.numr<-log(numr)-log.fenzi_o
-          numr<-exp(log.numr+log.fenzi_n)
-          nchanadd<-bas[2]*exp(py(Y,ColH$t,phi_n)-py(Y,ColH$t,PhiC[bas[1],]))
-          numr[nchan]<-numr[nchan]+nchanadd
+          log.numr<-log.numr-log.fenzi_o+log.fenzi_n
+          log.nchanadd<-log(bas[2])+py(Y,ColH$t,phi_n)-py(Y,ColH$t,PhiC[bas[1],])
+          if(exp(log.numr[nchan])+exp(log.nchanadd)==0){
+            log.numr[nchan]<-log(exp(log.numr[nchan]+200)+exp(log.nchanadd+200))-200
+          }else{
+            log.numr[nchan]<-log(exp(log.numr[nchan])+exp(log.nchanadd))
+          }
           log.fenzi_o<-log.fenzi_n
-          deno<-sum(numr)
-          Ptau<-numr/deno
+          deno<-sum(exp(log.numr))
+          Ptau<-exp(log.numr)/deno
         }else{
           log.fenzi_n<-apply(Tt,FUN = log.fenzi,MARGIN = 2)  
           nchanadd<-length(log.fenzi_n)
-          log.numr<-log(numr)-log.fenzi_o
-          numr<-exp(log.numr+log.fenzi_n[-nchanadd])
-          numr[nchanadd]<-bas[2]*exp(py(Y,ColH$t,phi_n)-py(Y,ColH$t,PhiC[bas[1],]))
+          log.numr<-log.numr-log.fenzi_o+log.fenzi_n[-nchanadd]
+          log.numr[nchanadd]<-log(bas[2])+py(Y,ColH$t,phi_n)-py(Y,ColH$t,PhiC[bas[1],])
           log.fenzi_o<-log.fenzi_n
-          deno<-sum(numr)
-          Ptau<-numr/deno
+          deno<-sum(exp(log.numr))
+          Ptau<-exp(log.numr)/deno
         }
       }
       Count_Tt<-dim(Tt)[2]
@@ -389,7 +391,7 @@ MA_aux<-function(init,Z,Y,PhiC,num_run=1000,burn_in=500){
     }
     print(c(i,InR$t))
   }
-  MA_aux_out<-list(Tt=Tt,Ptau=Ptau,log.fenzi_o=log.fenzi_o,numr=numr,t=H$t,I=H$I,n_trun=n_trun,aux_num_run=num_run,W=W,theta=theta,phi=phi)
+  MA_aux_out<-list(Tt=Tt,Ptau=Ptau,log.fenzi_o=log.fenzi_o,log.numr=log.numr,t=H$t,I=H$I,n_trun=n_trun,aux_num_run=num_run,W=W,theta=theta,phi=phi)
   return(MA_aux_out)
 }
 
@@ -424,7 +426,7 @@ MA_ex<-function(Aux_Tt,init,Z,Y,PhiC,num_run=1000,burn_in=500,thin=1){
   Tt<-Aux_Tt$Tt
   Ptau<-Aux_Tt$Ptau
   log.fenzi_o<-Aux_Tt$log.fenzi_o
-  numr<-Aux_Tt$numr
+  log.numr<-Aux_Tt$log.numr
   InRadd<-Aux_Tt$aux_num_run
   Count_Tt<-dim(MA_aux_out$Tt)[2]
   for(i in 1:num_run){
@@ -458,22 +460,24 @@ MA_ex<-function(Aux_Tt,init,Z,Y,PhiC,num_run=1000,burn_in=500,thin=1){
         }
         
         nchan<-which(apply(Tt,FUN=iidentical,MARGIN = 2))
-        log.numr<-log(numr)-log.fenzi_o
-        numr<-exp(log.numr+log.fenzi_n)
-        nchanadd<-bas[2]*exp(py(Y,ColH$t,phi_n)-py(Y,ColH$t,PhiC[bas[1],]))
-        numr[nchan]<-numr[nchan]+nchanadd
+        log.numr<-log.numr-log.fenzi_o+log.fenzi_n
+        log.nchanadd<-log(bas[2])+py(Y,ColH$t,phi_n)-py(Y,ColH$t,PhiC[bas[1],])
+        if(exp(log.numr[nchan])+exp(log.nchanadd)==0){
+          log.numr[nchan]<-log(exp(log.numr[nchan]+200)+exp(log.nchanadd+200))-200
+        }else{
+          log.numr[nchan]<-log(exp(log.numr[nchan])+exp(log.nchanadd))
+        }
         log.fenzi_o<-log.fenzi_n
-        deno<-sum(numr)
-        Ptau<-numr/deno
+        deno<-sum(exp(log.numr))
+        Ptau<-exp(log.numr)/deno
       }else{
         log.fenzi_n<-apply(Tt,FUN = log.fenzi,MARGIN = 2)  
         nchanadd<-length(log.fenzi_n)
-        log.numr<-log(numr)-log.fenzi_o
-        numr<-exp(log.numr+log.fenzi_n[-nchanadd])
-        numr[nchanadd]<-bas[2]*exp(py(Y,ColH$t,phi_n)-py(Y,ColH$t,PhiC[bas[1],]))
+        log.numr<-log.numr-log.fenzi_o+log.fenzi_n[-nchanadd]
+        log.numr[nchanadd]<-log(bas[2])+py(Y,ColH$t,phi_n)-py(Y,ColH$t,PhiC[bas[1],])
         log.fenzi_o<-log.fenzi_n
-        deno<-sum(numr)
-        Ptau<-numr/deno
+        deno<-sum(exp(log.numr))
+        Ptau<-exp(log.numr)/deno
       }
       Count_Tt<-dim(Tt)[2]
       
@@ -520,22 +524,24 @@ MA_ex<-function(Aux_Tt,init,Z,Y,PhiC,num_run=1000,burn_in=500,thin=1){
         }
         
         nchan<-which(apply(Tt,FUN=iidentical,MARGIN = 2))
-        log.numr<-log(numr)-log.fenzi_o
-        numr<-exp(log.numr+log.fenzi_n)
-        nchanadd<-bas[2]*exp(py(Y,ColH$t,phi_n)-py(Y,ColH$t,PhiC[bas[1],]))
-        numr[nchan]<-numr[nchan]+nchanadd
+        log.numr<-log.numr-log.fenzi_o+log.fenzi_n
+        log.nchanadd<-log(bas[2])+py(Y,ColH$t,phi_n)-py(Y,ColH$t,PhiC[bas[1],])
+        if(exp(log.numr[nchan])+exp(log.nchanadd)==0){
+          log.numr[nchan]<-log(exp(log.numr[nchan]+200)+exp(log.nchanadd+200))-200
+        }else{
+          log.numr[nchan]<-log(exp(log.numr[nchan])+exp(log.nchanadd))
+        }
         log.fenzi_o<-log.fenzi_n
-        deno<-sum(numr)
-        Ptau<-numr/deno
+        deno<-sum(exp(log.numr))
+        Ptau<-exp(log.numr)/deno
       }else{
         log.fenzi_n<-apply(Tt,FUN = log.fenzi,MARGIN = 2)  
         nchanadd<-length(log.fenzi_n)
-        log.numr<-log(numr)-log.fenzi_o
-        numr<-exp(log.numr+log.fenzi_n[-nchanadd])
-        numr[nchanadd]<-bas[2]*exp(py(Y,ColH$t,phi_n)-py(Y,ColH$t,PhiC[bas[1],]))
+        log.numr<-log.numr-log.fenzi_o+log.fenzi_n[-nchanadd]
+        log.numr[nchanadd]<-log(bas[2])+py(Y,ColH$t,phi_n)-py(Y,ColH$t,PhiC[bas[1],])
         log.fenzi_o<-log.fenzi_n
-        deno<-sum(numr)
-        Ptau<-numr/deno
+        deno<-sum(exp(log.numr))
+        Ptau<-exp(log.numr)/deno
       }
       Count_Tt<-dim(Tt)[2]
       
@@ -559,7 +565,7 @@ MA_ex<-function(Aux_Tt,init,Z,Y,PhiC,num_run=1000,burn_in=500,thin=1){
       sto.time[((i-burn_in)/thin)]<-diff_time
     }
     if(i %in% seq(10000,100000,1000)){
-      Tem_out<-list(phi=sto.phi[1:((i-burn_in)/thin),],theta=sto.theta[1:((i-burn_in)/thin),],time=sto.time[1:((i-burn_in)/thin)],Tt=Tt[1,],log.Ptau_fenmu=log(numr)-log.fenzi_o)
+      Tem_out<-list(phi=sto.phi[1:((i-burn_in)/thin),],theta=sto.theta[1:((i-burn_in)/thin),],time=sto.time[1:((i-burn_in)/thin)],Tt=Tt[1,],log.Ptau_fenmu=log.numr-log.fenzi_o)
       Tem_RR<-data.frame(phi_ten= Tem_out$phi[,10],phi_one= Tem_out$phi[,1],theta= Tem_out$theta,time= Tem_out$time)
       write.csv(Tem_RR,paste("Result_",task_id,".csv",sep = ""))
       Tem_Pr<-data.frame(Tt=Tem_out$Tt,Ptau=Tem_out$Ptau_fenmu)
@@ -567,7 +573,7 @@ MA_ex<-function(Aux_Tt,init,Z,Y,PhiC,num_run=1000,burn_in=500,thin=1){
     }
     print(c(i,rate,alfa,theta))
   }
-  OUT<-list(phi=sto.phi,theta=sto.theta,Tt=Tt[1,],Ptau=Ptau,time=sto.time,log.Ptau_fenmu=log(numr)-log.fenzi_o)
+  OUT<-list(phi=sto.phi,theta=sto.theta,Tt=Tt[1,],Ptau=Ptau,time=sto.time,log.Ptau_fenmu=log.numr-log.fenzi_o)
   return(OUT)
 }
 
