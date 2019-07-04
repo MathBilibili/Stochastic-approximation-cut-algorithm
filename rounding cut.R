@@ -6,6 +6,18 @@ library(truncnorm)
 task_id_string <- Sys.getenv("SLURM_ARRAY_TASK_ID")
 task_id <- as.numeric(task_id_string)
 
+min.n<-function(x,n,value=TRUE){
+  if(value==TRUE){x[order(x)][n]} else {order(x)[n]}
+} 
+
+Min.n<-function(x,n){
+  ou<-rep(0,n)
+  for(i in 1:n){
+    ou[i]<-min.n(x,i,value = F)
+  }
+  return(ou)
+}
+
 data<-read.csv("simu_data.csv")
 Y<-apply(data,1,mean)
 N<-dim(data)[1]
@@ -183,27 +195,49 @@ p_inv<-function(t,phi,phist,wst){
 
 #proposal sampling for t and phi
 pro_tp<-function(P,pro_tp_inp){
+  m<-length(PhiC[,1])-1                                # number of neighbour
+  I<-pro_tp_inp$I
+  I_n<-rep(0,length(I))
   t<-pro_tp_inp$t
+  t_n<-rep(1,d_x)
   phi<-pro_tp_inp$phi
   ran<-runif(1,0,1)
   if(ran<P){
     t_n<-rtruncnorm(1,a=0, b=100,mean = t,sd=0.1)      #proposal for t may be changed
-    out<-list(t=t_n,phi=phi)
+    out<-list(t=t_n,phi=phi,I=I)
   }else{
-    phi_n<-PhiC[sample(seq(1,dim(PhiC)[1]),1),]  
-    out<-list(t=t,phi=phi_n)
+    I_n<-Min.n(as.numeric(dist2(t(as.matrix(phi)),PhiC[-I,])),m)[sample(seq(1,m),1)]
+    if(I_n<I){
+      I_n<-I_n
+    }else{
+      I_n<-I_n+1
+    }
+    phi_n<-PhiC[I_n,]
+    out<-list(t=t,phi=phi_n,I=I_n)
   }
   return(out)
 }
 
 #proposal density for t and phi
 dpro_tp<-function(P,x_n,x){
+  m<-length(PhiC[,1])-1 
   t<-x$t
   t_n<-x_n$t
   phi<-x$phi
   phi_n<-x_n$phi
+  I<-x$I
+  I_n<-x_n$I
+  if(I_n>I){
+    I_n<-I_n-1
+  }else{
+    I_n<-I_n
+  }
   if(identical(t,t_n)){
-    out<-1/(dim(PhiC)[1])*(1-P)
+    if(I_n %in% Min.n(as.numeric(dist2(t(as.matrix(phi)),PhiC[-I,])),m)){
+      out<-1/m*(1-P)
+    }else{
+      out<-0
+    }
   }else{
     out<-dtruncnorm(t_n,a=0, b=100,mean = t,sd=0.1)*P        #proposal for t may be changed
   }
@@ -244,6 +278,7 @@ MA_in<-cmpfun(MA_in)
 
 Digset<-c(3,4,10)
 #sig_dig<-10                   #significant digit used to round t for high efficiency.
+#sig_dig<-c(3,3)
 if(d_x==1){
   sig_dig<-Digset[task_id]
 }else{
