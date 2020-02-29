@@ -1,0 +1,15 @@
+Package: Plummer2015Example
+Type: Package
+Title: What the Package Does (Title Case)
+Version: 0.1.0
+Author: Who wrote it
+Maintainer: The package maintainer <yourself@somewhere.net>
+Description: More about what it does (maybe more than one line)
+    Use four spaces when indenting paragraphs within the Description.
+License: What license is it under?
+Encoding: UTF-8
+LazyData: true
+Imports: Rcpp (>= 1.0.3)
+LinkingTo: Rcpp
+Built: R 3.6.2; x86_64-w64-mingw32; 2020-02-29 20:40:30 UTC; windows
+Archs: x64
