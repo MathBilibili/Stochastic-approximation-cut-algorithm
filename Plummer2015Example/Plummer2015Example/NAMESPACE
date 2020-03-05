@@ -1,3 +1,0 @@
-exportPattern("^[[:alpha:]]+")
-importFrom(Rcpp, evalCpp)
-useDynLib(Plummer2015Example, .registration = TRUE)
