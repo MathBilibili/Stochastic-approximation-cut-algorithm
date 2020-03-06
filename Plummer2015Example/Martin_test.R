@@ -10,14 +10,19 @@ library(dplyr)
 library(ggplot2)
 library(tidyr)
 library(data.table)
+library(Plummer2015Example)
 
 #data specification
 task_id_string <- Sys.getenv("SLURM_ARRAY_TASK_ID")
-task_id <- 1
+task_id <- as.numeric(task_id_string) 
 
 #cl<-makeCluster(detectCores( ))  
-cl<-makeCluster(10)  
+cl<-makeCluster(10,type = 'FORK')  
+registerDoParallel(cl)
 dmvnorm<-dmvnorm
+
+#sd scaler
+sd_scaler<-c(1,10,20)[task_id]
 
 min.n<-function(x,n,value=TRUE){
   if(value==TRUE){x[order(x)][n]} else {order(x)[n]}
@@ -41,6 +46,7 @@ Npop <- c(26983, 250930, 829348, 157775, 150467, 352445, 553066, 26751, 75815, 1
 d_x<-2       # dimension of theta
 d_y<-length(Npart)       # dimension of phi
 
+if(FALSE){
 #density 1 Z|phi \times phi
 px<-function(phi,Z){
   PbZ<-rbind(phi,Z,Npart)
@@ -52,6 +58,7 @@ py<-function(Y,theta,phi){
   PbY<-rbind(phi,Y,Npop)
   out<- log(1/200)+sum(apply(PbY,FUN=function(y){dpois(x=y[2],lambda = (y[3]*0.001*exp(theta[1]+theta[2]*y[1])),log = T)},MARGIN = 2))
   return(out)
+}
 }
 
 #proposal 1
@@ -292,7 +299,7 @@ pro_tp<-function(P,pro_tp_inp){
     coin<-c(1,0)
     #t_n[1]<-rtruncnorm(1,a=-100, b=100,mean = t[1],sd=0.005)      #proposal for t may be changed
     #t_n[2]<-rtruncnorm(1,a=-1000, b=1000,mean = t[2],sd=0.1)
-    t_n<-rmvnorm(1,mean = t,sigma = matrix(c(0.1648181,-0.3979341,-0.3979341,2.737874),ncol=2,nrow=2)/10) %>% t()
+    t_n<-rmvnorm(1,mean = t,sigma = matrix(c(0.1648181,-0.3979341,-0.3979341,2.737874),ncol=2,nrow=2)/sd_scaler) %>% t()
     out<-list(t=t_n,phi=phi,I=I,coin=coin)
   }else{
     coin<-c(0,1)
@@ -325,14 +332,14 @@ dpro_tp<-function(P,x_n,x){
     out<-1/(dim(PhiC)[1]-1)*(1-P)
   }else{
     #out<-dtruncnorm(t_n[1],a=-100, b=100,mean = t[1],sd=0.005)*dtruncnorm(t_n[2],a=-1000, b=1000,mean = t[2],sd=0.1)*P        #proposal for t may be changed
-    out<-dmvnorm(as.numeric(t_n),mean = as.numeric(t),sigma = matrix(c(0.1648181,-0.3979341,-0.3979341,2.737874),ncol=2,nrow=2)/10)*P 
+    out<-dmvnorm(as.numeric(t_n),mean = as.numeric(t),sigma = matrix(c(0.1648181,-0.3979341,-0.3979341,2.737874),ncol=2,nrow=2)/sd_scaler)*P 
     }
   return(out)
 }
 
 
 #internal chain
-no<-2000
+no<-20000
 MA_in<-function(H,W,n,pai,n_trun){
   t<-H$t
   I<-H$I
@@ -539,7 +546,9 @@ MA_aux<-function(init,Z,Y,PhiC,num_run=1000,burn_in=500){
     st.W<-log(W)
     st.I[i]<-InR$I
     ac_pro<-coin/i
-    print(c(i,InR$t,InR$I,ac_pro))
+    if(i %in% seq(1,num_run,10)){
+      print(c(i,InR$t,InR$I,ac_pro))
+    }
   }
   MA_aux_out<-list(Tt=Tt,auphi=sto.auphi.i,autheta=sto.autheta.i,Ptau=Ptau,rpt=rpt,log.fenzi_o=log.fenzi_o,log.numr=log.numr,t=H$t,I=H$I,n_trun=n_trun,aux_num_run=num_run,W=W,theta=theta,phi=phi,coin=coin)
   return(MA_aux_out)
@@ -547,8 +556,11 @@ MA_aux<-function(init,Z,Y,PhiC,num_run=1000,burn_in=500){
 
 MA_aux<-cmpfun(MA_aux)
 
-MA_aux_out<-MA_aux(init,Z,Y,PhiC,num_run = 150100,burn_in=150000)
+MA_aux_out<-MA_aux(init,Z,Y,PhiC,num_run = 1501000,burn_in=1500000)
 
+print(paste('internal chain finished at',Sys.time()))
+
+write.csv(log(MA_aux_out$W),paste("logW",task_id,".csv",sep=""))
 
 RR.in<-data.table(auphi=MA_aux_out$auphi,autheta=MA_aux_out$autheta)
 write.csv(RR.in,paste("Result_CutRegion_inter",task_id,".csv",sep = ""))
@@ -590,7 +602,7 @@ MA_ex<-function(Aux_Tt,init,Z,Y,PhiC,num_run=1000,burn_in=500,thin=1){
   log.numr<-Aux_Tt$log.numr
   InRadd<-Aux_Tt$aux_num_run
   Count_Tt<-dim(MA_aux_out$Tt)[2]
-  clusterExport(cl, list('py','Y','Npop','dmvnorm'), envir=environment())
+  #clusterExport(cl, list('py','Y','Npop','dmvnorm'), envir=environment())
   foreach(i = icount(num_run)) %do%{
     if((i<=burn_in)|(i%%thin!=0)){
       for(k in 1:1){
@@ -619,14 +631,16 @@ MA_ex<-function(Aux_Tt,init,Z,Y,PhiC,num_run=1000,burn_in=500,thin=1){
           return(identical(x,as.numeric(ColH$t)))
         }
         if(dim(Tt)[2]>1){
-          clusterExport(cl, list('phi_n'), envir=environment())
-          log.fenzi_n<-parApply(cl,Tt,FUN = log.fenzi,MARGIN = 2)
+          #clusterExport(cl, list('phi_n'), envir=environment())
+          #log.fenzi_n<-parApply(cl,Tt,FUN = log.fenzi,MARGIN = 2)
+          log.fenzi_n<-as.numeric(mclapply(lapply(seq_len(ncol(Tt)), function(i) Tt[, i]),FUN = log.fenzi))
         }else{
           log.fenzi_n<-py(Y,Tt,phi_n)
         }
         
-        clusterExport(cl, list('identical','ColH'),envir=environment())
-        nchan<-which(parApply(cl,Tt,FUN=iidentical,MARGIN = 2))
+        #clusterExport(cl, list('identical','ColH'),envir=environment())
+        #nchan<-which(parApply(cl,Tt,FUN=iidentical,MARGIN = 2))
+        nchan<-which(unlist(mclapply(lapply(seq_len(ncol(Tt)), function(i) Tt[, i]),FUN = iidentical)))
         rpt[nchan]<-rpt[nchan]+1
         log.numr<-log.numr-log.fenzi_o+log.fenzi_n
         log.nchanadd<-log(bas[2])+py(Y,ColH$t,phi_n)-py(Y,ColH$t,PhiC[bas[1],])
@@ -659,8 +673,9 @@ MA_ex<-function(Aux_Tt,init,Z,Y,PhiC,num_run=1000,burn_in=500,thin=1){
         Ptau<-exp(log.numr.scale)/deno
       }else{
         rpt<-append(rpt,1)
-        clusterExport(cl, list('phi_n'), envir=environment())
-        log.fenzi_n<-parApply(cl,Tt,FUN = log.fenzi,MARGIN = 2) 
+        #clusterExport(cl, list('phi_n'), envir=environment())
+        #log.fenzi_n<-parApply(cl,Tt,FUN = log.fenzi,MARGIN = 2) 
+        log.fenzi_n<-as.numeric(mclapply(lapply(seq_len(ncol(Tt)), function(i) Tt[, i]),FUN = log.fenzi))
         nchanadd<-length(log.fenzi_n)
         log.numr<-log.numr-log.fenzi_o+log.fenzi_n[-nchanadd]
         log.numr[nchanadd]<-log(bas[2])+py(Y,ColH$t,phi_n)-py(Y,ColH$t,PhiC[bas[1],])
@@ -732,14 +747,16 @@ MA_ex<-function(Aux_Tt,init,Z,Y,PhiC,num_run=1000,burn_in=500,thin=1){
           return(identical(x,as.numeric(ColH$t)))
         }
         if(dim(Tt)[2]>1){
-          clusterExport(cl, list('phi_n'), envir=environment())
-          log.fenzi_n<-parApply(cl,Tt,FUN = log.fenzi,MARGIN = 2) 
+         # clusterExport(cl, list('phi_n'), envir=environment())
+          #log.fenzi_n<-parApply(cl,Tt,FUN = log.fenzi,MARGIN = 2) 
+          log.fenzi_n<-as.numeric(mclapply(lapply(seq_len(ncol(Tt)), function(i) Tt[, i]),FUN = log.fenzi))
         }else{
           log.fenzi_n<-py(Y,Tt,phi_n)
         }
         
-        clusterExport(cl, list('identical','ColH'),envir=environment())
-        nchan<-which(parApply(cl,Tt,FUN=iidentical,MARGIN = 2))
+       # clusterExport(cl, list('identical','ColH'),envir=environment())
+        #nchan<-which(parApply(cl,Tt,FUN=iidentical,MARGIN = 2))
+        nchan<-which(unlist(mclapply(lapply(seq_len(ncol(Tt)), function(i) Tt[, i]),FUN = iidentical)))
         rpt[nchan]<-rpt[nchan]+1
         log.numr<-log.numr-log.fenzi_o+log.fenzi_n
         log.nchanadd<-log(bas[2])+py(Y,ColH$t,phi_n)-py(Y,ColH$t,PhiC[bas[1],])
@@ -773,8 +790,9 @@ MA_ex<-function(Aux_Tt,init,Z,Y,PhiC,num_run=1000,burn_in=500,thin=1){
         Ptau<-exp(log.numr.scale)/deno
       }else{
         rpt<-append(rpt,1)
-        clusterExport(cl, list('phi_n'), envir=environment())
-        log.fenzi_n<-parApply(cl,Tt,FUN = log.fenzi,MARGIN = 2) 
+       # clusterExport(cl, list('phi_n'), envir=environment())
+        #log.fenzi_n<-parApply(cl,Tt,FUN = log.fenzi,MARGIN = 2) 
+        log.fenzi_n<-as.numeric(mclapply(lapply(seq_len(ncol(Tt)), function(i) Tt[, i]),FUN = log.fenzi))
         nchanadd<-length(log.fenzi_n)
         log.numr<-log.numr-log.fenzi_o+log.fenzi_n[-nchanadd]
         log.numr[nchanadd]<-log(bas[2])+py(Y,ColH$t,phi_n)-py(Y,ColH$t,PhiC[bas[1],])
@@ -825,13 +843,14 @@ MA_ex<-function(Aux_Tt,init,Z,Y,PhiC,num_run=1000,burn_in=500,thin=1){
     if(i %in% seq(1000,500000,1000)){
       Tem_out<-list(phi=sto.phi[1:((i-burn_in)/thin),],auxphi=sto.auphi[1:((i-burn_in)/thin)],theta=sto.theta[1:((i-burn_in)/thin),],auxtheta=sto.autheta[1:((i-burn_in)/thin),],time=sto.time[1:((i-burn_in)/thin)],Tt=Tt[2,],log.Ptau_fenmu=log.numr-log.fenzi_o)
       Tem_RR<-data.table(phi= Tem_out$phi,auxphi= Tem_out$auxphi,theta= Tem_out$theta,auxtheta= Tem_out$auxtheta,time= Tem_out$time)
-      write.csv(Tem_RR,paste("Result_CutRegion",task_id,".csv",sep = ""))
+      write.csv(Tem_RR,paste("Result_1k",task_id,".csv",sep = ""))
       Tem_Pr<-data.table(Tt=Tem_out$Tt,Ptau=Tem_out$log.Ptau_fenmu)
-      write.csv(Tem_Pr,paste("TauProbability_CutRegion",task_id,".csv",sep = ""))
-      pdf('theta_plot.pdf')
+      write.csv(Tem_Pr,paste("TauProbability_1k",task_id,".csv",sep = ""))
+      pdf(paste("theta_plot",task_id,".pdf",sep=""))
       fig<-ggplot(Tem_RR,aes(x=theta.V2,y=theta.V1))+geom_point(col='lightblue')
       print(fig)
       dev.off()
+      print('Record result')
     }
     ac_pro<-coin/(i+InRadd)
     
@@ -859,5 +878,5 @@ stopCluster(cl)
 
 RR<-data.table(phi=Result$phi,auphi=Result$auphi,theta=Result$theta,autheta=Result$autheta,time=Result$time)
 TauPro<-data.table(Tt=Result$Tt,Ptau=Result$log.Ptau_fenmu)
-write.csv(RR,paste("Result_CutRegion",task_id,".csv",sep = ""))
-write.csv(TauPro,paste("TauProbability_CutRegion",task_id,".csv",sep = ""))
+write.csv(RR,paste("Result_1k",task_id,".csv",sep = ""))
+write.csv(TauPro,paste("TauProbability_1k",task_id,".csv",sep = ""))
