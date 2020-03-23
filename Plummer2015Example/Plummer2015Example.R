@@ -12,7 +12,7 @@ library(tidyr)
 library(data.table)
 
 #indicate if you are using a C code to write density function
-cpp_yes<-TRUE
+cpp_yes<-FALSE
 #if cpp_yes == TRUE, name the cpp package here:
 cpp_package<-'Plummer2015Example'
 #indicate your system
@@ -102,35 +102,36 @@ rprox<-function(phi){
 is_newPhi0<-TRUE
 if(is_newPhi0){
   #Choice of Auxiliary Parameter Set chain
-   init<-list(phi=rep(0.5,d_y))
-   MAux<-function(init,Z,num_run=1000,burn_in=500,thin=1){
-     phi<-init$phi
-     sto.phi<-as.matrix(rep(phi,((num_run-burn_in)/thin))) #note the dimension of phi
-     dim(sto.phi)<-c(((num_run-burn_in)/thin),length(phi))
-     for(i in 1:num_run){
-       if((i<=burn_in)|(i%%thin!=0)){
-         phi_n<-rprox(phi)
-         rate<-px(phi_n,Z)+prox(phi,phi_n)-px(phi,Z)-prox(phi_n,phi)
-         alfa<-min(1,exp(rate))
-         rpan<-runif(1)
-         phi<-phi_n*sign(rpan<=alfa)+phi*sign(rpan>alfa)
-       }else{
-         phi_n<-rprox(phi)
-         rate<-px(phi_n,Z)+prox(phi,phi_n)-px(phi,Z)-prox(phi_n,phi)
-         alfa<-min(1,exp(rate))
-         rpan<-runif(1)
-         phi<-phi_n*sign(rpan<=alfa)+phi*sign(rpan>alfa)
-         sto.phi[((i-burn_in)/thin),]<-phi
-       }
-     }
-     out<-sto.phi[duplicated.matrix(sto.phi,MARGIN = 1)!=T,]
-     return(out)
-   }
-   MAux<-cmpfun(MAux)     #byte compile
-   
-   
-    #standardise element of phi
-    Phistar<-MAux(init,Z,num_run=15000,burn_in=10000,thin=1)
+  init<-list(phi=rep(0.5,d_y))
+  MAux<-function(init,Z,num_run=1000,burn_in=500,thin=1){
+    phi<-init$phi
+    sto.phi<-as.matrix(rep(phi,((num_run-burn_in)/thin))) #note the dimension of phi
+    dim(sto.phi)<-c(((num_run-burn_in)/thin),length(phi))
+    for(i in 1:num_run){
+      if((i<=burn_in)|(i%%thin!=0)){
+        phi_n<-rprox(phi)
+        rate<-px(phi_n,Z)+prox(phi,phi_n)-px(phi,Z)-prox(phi_n,phi)
+        alfa<-min(1,exp(rate))
+        rpan<-runif(1)
+        phi<-phi_n*sign(rpan<=alfa)+phi*sign(rpan>alfa)
+      }else{
+        phi_n<-rprox(phi)
+        rate<-px(phi_n,Z)+prox(phi,phi_n)-px(phi,Z)-prox(phi_n,phi)
+        alfa<-min(1,exp(rate))
+        rpan<-runif(1)
+        phi<-phi_n*sign(rpan<=alfa)+phi*sign(rpan>alfa)
+        sto.phi[((i-burn_in)/thin),]<-phi
+      }
+    }
+    out<-sto.phi[duplicated.matrix(sto.phi,MARGIN = 1)!=T,]
+    return(out)
+  }
+  MAux<-cmpfun(MAux)     #byte compile
+  
+  
+  #standardise element of phi
+  Phistar<-MAux(init,Z,num_run=15000,burn_in=10000,thin=1)
+  if(d_y!=1){
     da<-apply(Phistar,max,MARGIN = 1)
     xi<-apply(Phistar,min,MARGIN = 1)
     p<-cbind(Phistar,da,xi)
@@ -144,9 +145,13 @@ if(is_newPhi0){
       return(out)
     }
     Phistan<-t(apply(p,FUN=stan,MARGIN = 1))
-    
-    #Max-Min process
-    MMP<-function(Phi,num_sel=100){
+  }else{
+    Phistan<-Phistar
+  }
+  
+  #Max-Min process
+  MMP<-function(Phi,num_sel=100){
+    if(d_y!=1){
       num_sel<-min(num_sel,dim(Phi)[1])
       ind<-seq(1,dim(Phi)[1])
       A<-sample(ind,size=1)
@@ -163,13 +168,28 @@ if(is_newPhi0){
         Ac<-ind[!ind%in%A]
       }
       return(A)
+    }else{
+      num_sel<-min(num_sel,dim(Phi)[1])
+      ind<-seq(1,dim(Phi)[1])
+      A<-sample(ind,size=1)
+      Ac<-ind[!ind%in%A]
+      for(i in 2:num_sel){
+        X<-Phi[A,]
+        Y<-Phi[Ac,]
+        d<-dist2(X,Y)
+        mi<-apply(d,min,MARGIN = 2)
+        A[i]<-Ac[which.max(mi)]
+        Ac<-ind[!ind%in%A]
+      }
+      return(A)
     }
-    
-    MMP<-cmpfun(MMP)
-    PhiC<-Phistar[MMP(Phistan,num_sel=500),]
-    
-#store PhiC for future use    
-    write.csv(PhiC,"AuxPhi.csv")
+  }
+  
+  MMP<-cmpfun(MMP)
+  PhiC<-Phistar[MMP(Phistan,num_sel=500),]
+  
+  #store PhiC for future use    
+  write.csv(PhiC,"AuxPhi.csv",row.names = F)
 }
 ###################################################
 
@@ -180,46 +200,66 @@ ncol.print <- function(dat) matrix(as.matrix(dat),ncol=ncol(dat),dimnames=NULL)
 #make sure your have removed all column name and row name in your file.csv!
 load_newPhi0<-TRUE
 if(load_newPhi0){
-Phistar<-ncol.print(as.matrix(fread("PhiC.csv",head=F)))
-
- da<-apply(Phistar,max,MARGIN = 1)
- xi<-apply(Phistar,min,MARGIN = 1)
- p<-cbind(Phistar,da,xi)
- stan<-function(v){
-   v<-as.vector(v)
-   if(v[length(v)]!=v[length(v)-1]){
-     out<-(v[1:(length(v)-2)]-v[length(v)])/(v[length(v)-1]-v[length(v)])
-   }else{
-     out<-rep(0,(length(v)-2))
-   }
-   return(out)
- }
- Phistan<-t(apply(p,FUN=stan,MARGIN = 1))
- 
- #Max-Min process
- MMP<-function(Phi,num_sel=100){
-   num_sel<-min(num_sel,dim(Phi)[1])
-   ind<-seq(1,dim(Phi)[1])
-   A<-sample(ind,size=1)
-   Ac<-ind[!ind%in%A]
-   for(i in 2:num_sel){
-     X<-Phi[A,]
-     if(is.vector(X)){
-       X<-t(as.matrix(X))
-     }
-     Y<-Phi[Ac,]
-     d<-dist2(X,Y)
-     mi<-apply(d,min,MARGIN = 2)
-     A[i]<-Ac[which.max(mi)]
-     Ac<-ind[!ind%in%A]
-   }
-   return(A)
- }
- 
- MMP<-cmpfun(MMP)
- 
-#the number of auxiliary \Phi_0 is given by 'num_sel'
- PhiC<-Phistar[MMP(Phistan,num_sel=80),]
+  Phistar<-ncol.print(as.matrix(fread("PhiC.csv",head=F)))
+  
+  if(d_y!=1){
+    da<-apply(Phistar,max,MARGIN = 1)
+    xi<-apply(Phistar,min,MARGIN = 1)
+    p<-cbind(Phistar,da,xi)
+    stan<-function(v){
+      v<-as.vector(v)
+      if(v[length(v)]!=v[length(v)-1]){
+        out<-(v[1:(length(v)-2)]-v[length(v)])/(v[length(v)-1]-v[length(v)])
+      }else{
+        out<-rep(0,(length(v)-2))
+      }
+      return(out)
+    }
+    Phistan<-t(apply(p,FUN=stan,MARGIN = 1))
+  }else{
+    Phistan<-Phistar
+  }
+  
+  #Max-Min process
+  MMP<-function(Phi,num_sel=100){
+    if(d_y!=1){
+      num_sel<-min(num_sel,dim(Phi)[1])
+      ind<-seq(1,dim(Phi)[1])
+      A<-sample(ind,size=1)
+      Ac<-ind[!ind%in%A]
+      for(i in 2:num_sel){
+        X<-Phi[A,]
+        if(is.vector(X)){
+          X<-t(as.matrix(X))
+        }
+        Y<-Phi[Ac,]
+        d<-dist2(X,Y)
+        mi<-apply(d,min,MARGIN = 2)
+        A[i]<-Ac[which.max(mi)]
+        Ac<-ind[!ind%in%A]
+      }
+      return(A)
+    }else{
+      num_sel<-min(num_sel,dim(Phi)[1])
+      ind<-seq(1,dim(Phi)[1])
+      A<-sample(ind,size=1)
+      Ac<-ind[!ind%in%A]
+      for(i in 2:num_sel){
+        X<-Phi[A,]
+        Y<-Phi[Ac,]
+        d<-dist2(X,Y)
+        mi<-apply(d,min,MARGIN = 2)
+        A[i]<-Ac[which.max(mi)]
+        Ac<-ind[!ind%in%A]
+      }
+      return(A)
+    }
+  }
+  
+  MMP<-cmpfun(MMP)
+  
+  #the number of auxiliary \Phi_0 is given by 'num_sel'
+  PhiC<-Phistar[MMP(Phistan,num_sel=80),]
 }
 ###################################################
 
@@ -288,7 +328,7 @@ if(constrain_Phi){
 #   z = PP, type = "heatmap"
 # )
 
-
+PhiC<-as.matrix(PhiC)
 
 #renew proposal distribution for \phi
 #proposal 1
@@ -377,7 +417,7 @@ dpro_tp<-function(P,x_n,x){
   }else{
     #out<-dtruncnorm(t_n[1],a=-100, b=100,mean = t[1],sd=0.005)*dtruncnorm(t_n[2],a=-1000, b=1000,mean = t[2],sd=0.1)*P        #proposal for t may be changed
     out<-denT(t_n,t,P)
-    }
+  }
   return(out)
 }
 
