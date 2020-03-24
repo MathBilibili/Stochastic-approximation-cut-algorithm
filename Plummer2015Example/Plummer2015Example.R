@@ -146,7 +146,7 @@ if(is_newPhi0){
     }
     Phistan<-t(apply(p,FUN=stan,MARGIN = 1))
   }else{
-    Phistan<-Phistar
+    Phistan<-as.matrix(Phistar)
   }
   
   #Max-Min process
@@ -217,7 +217,7 @@ if(load_newPhi0){
     }
     Phistan<-t(apply(p,FUN=stan,MARGIN = 1))
   }else{
-    Phistan<-Phistar
+    Phistan<-as.matrix(Phistar)
   }
   
   #Max-Min process
