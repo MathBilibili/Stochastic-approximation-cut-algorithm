@@ -975,6 +975,8 @@ MA_ex<-function(Aux_Tt,init,Z,Y,PhiC,num_run=1000,burn_in=500,thin=1){
       sto.time[((i-burn_in)/thin)]<-diff_time
     }
     
+    debug <- F   #Debug
+    if(debug=T){
     if(i %in% seq(1000,500000,1000)){
       Tem_out<-list(phi=sto.phi[1:((i-burn_in)/thin),],auxphi=sto.auphi[1:((i-burn_in)/thin)],theta=sto.theta[1:((i-burn_in)/thin),],auxtheta=sto.autheta[1:((i-burn_in)/thin),],time=sto.time[1:((i-burn_in)/thin)],Tt=Tt[2,],log.Ptau_fenmu=log.numr-log.fenzi_o)
       Tem_RR<-data.table(phi= Tem_out$phi,auxphi= Tem_out$auxphi,theta= Tem_out$theta,auxtheta= Tem_out$auxtheta,time= Tem_out$time)
@@ -986,6 +988,7 @@ MA_ex<-function(Aux_Tt,init,Z,Y,PhiC,num_run=1000,burn_in=500,thin=1){
       print(fig)
       dev.off()
       print('Record result')
+    }
     }
     ac_pro<-coin/(i+InRadd)
     
