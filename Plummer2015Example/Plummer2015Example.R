@@ -186,6 +186,7 @@ if(is_newPhi0){
   }
   
   MMP<-cmpfun(MMP)
+  Phistar<-as.matrix(Phistar)
   PhiC<-Phistar[MMP(Phistan,num_sel=500),]
   
   #store PhiC for future use    
@@ -259,6 +260,7 @@ if(load_newPhi0){
   MMP<-cmpfun(MMP)
   
   #the number of auxiliary \Phi_0 is given by 'num_sel'
+  Phistar<-as.matrix(Phistar)
   PhiC<-Phistar[MMP(Phistan,num_sel=80),]
 }
 ###################################################
