@@ -60,5 +60,5 @@ MC<-function(init,y.m,s,num_run=1000,burn_in=500,thin=1){
 }
 
 init<-rep(5.5,N+1)
-Result<-MC(init,y.m,s,num_run=110000,burn_in=10000,thin=10)
+Result<-MC(init,y.m,s,num_run=100000,burn_in=0,thin=10)
 write.csv(Result,paste("Liu_mcmc",task_id,".csv",sep = ""))
