@@ -1,6 +1,8 @@
 # Stochastic Approximation Cut Algorithm (SACut)
 This is the R code to replicate the results of the Stochastic approximation cut algorithm.
 
+![Logo](https://user-images.githubusercontent.com/24710640/80987935-aec2e400-8e2a-11ea-81e3-3ebba6fef8c5.png)
+
 ## Authors
 Yang Liu and Robert Goudie
 MRC Biostatistics Unit
