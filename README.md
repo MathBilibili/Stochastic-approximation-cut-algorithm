@@ -5,6 +5,7 @@ This is the R code to replicate the results of the Stochastic approximation cut 
 
 ## Authors
 Yang Liu and Robert Goudie
+
 MRC Biostatistics Unit
 
 ## Introduction of SACut
