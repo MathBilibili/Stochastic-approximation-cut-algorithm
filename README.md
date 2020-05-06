@@ -1,5 +1,5 @@
 # Stochastic Approximation Cut Algorithm (SACut)
-This is the R code to replicate the results of the Stochastic approximation cut algorithm.
+This is the R package SACut to conduct the Stochastic Approximation Cut Algorithm. It also contains code that replicates the results in the paper.
 <img align="right" width="250" height="250" src="https://user-images.githubusercontent.com/24710640/81212775-495b2880-8fcd-11ea-9319-52ac4fd15f4f.png">
 
 ## Authors
