@@ -1,0 +1,23 @@
+Package: SACut
+Type: Package
+Title: Stochastic Approximation Cut Algorithm
+Version: 1.1.0
+Author: Yang Liu
+Maintainer: Yang Liu <yl571@cam.ac.uk>
+Description: Stochastic Approximation Cut Algorithm
+License: What license is it under?
+Encoding: UTF-8
+LazyData: true
+Imports:
+	modeltools,
+	flexclust,
+	compiler,
+	truncnorm,
+	mvtnorm,
+	foreach,
+	iterators,
+	doParallel,
+	dplyr,
+	tidyr,
+	data.table
+RoxygenNote: 7.1.0
