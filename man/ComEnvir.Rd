@@ -19,7 +19,7 @@ ComEnvir(is_Unix = TRUE, core_num = 1, clusterExport = list('py','Y','Npop','dmv
     The number of cores
   }
   \item{clusterExport}{
-    If Windows is used, please state the list of values involved on the master process of the variables to variables of the same names in the global environment of each node. This normalily is a list that includes 'py' (the unnormalized density2: Y|theta&phi \times theta), observation 'Y' and other variables or functions.
+    If Windows is used, please state the list of values involved on the master process of the variables to variables of the same names in the global environment of each node. This normalily is a list that includes 'py' (the unnormalized density2: Y|theta&phi * theta), observation 'Y' and other variables or functions.
   }
 }
 \details{
