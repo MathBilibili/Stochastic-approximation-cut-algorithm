@@ -8,8 +8,7 @@ Description: Stochastic Approximation Cut Algorithm
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true
-Imports:
-	modeltools,
+Imports:	modeltools,
 	flexclust,
 	compiler,
 	truncnorm,
