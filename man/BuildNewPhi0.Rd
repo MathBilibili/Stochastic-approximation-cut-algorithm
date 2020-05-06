@@ -2,7 +2,7 @@
 \alias{BuildNewPhi0}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-Function to build a new auxiliary parameter \Phi_0 set
+Function to build a new auxiliary parameter Phi_0 set
 }
 \description{
 This function builds an auxiliary parameter set for parameter phi, following the process discussed in Liang et al. (2016). The idea is to run a MCMC chain for phi only, then select a set of values from the samples of phi which represents the support of distribution p(phi|Z).

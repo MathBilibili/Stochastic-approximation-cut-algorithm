@@ -13,10 +13,10 @@ CutModel(px = px, py = py, prox = prox, rprox = rprox, denT = denT, tranT = tran
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{px}{
-    The density1: Z|phi \times phi
+    The density1: Z|phi * phi
 }
   \item{py}{
-    The unnormalized density2: Y|theta&phi \times theta
+    The unnormalized density2: Y|theta&phi * theta
   }
   \item{prox}{
     The proposal density for phi
@@ -55,10 +55,10 @@ CutModel(px = px, py = py, prox = prox, rprox = rprox, denT = denT, tranT = tran
 \value{
   It produce a list of density function and observations. This simplifies the process when these functions and observations are loaded in other functions.
 \item{px}{
-    The density1: Z|phi \times phi
+    The density1: Z|phi * phi
 }
   \item{py}{
-    The unnormalized density2: Y|theta&phi \times theta
+    The unnormalized density2: Y|theta&phi * theta
   }
   \item{prox}{
     The proposal density for phi
