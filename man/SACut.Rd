@@ -50,7 +50,7 @@ SACut(pre_values, PhiC,numrun=1000,burnin=500,thin=1, no=1000,acce_pa=1, sig_dig
 %%  ~~ If necessary, more details than the description above ~~
 }
 \value{
-A .CSV file which contains samples of theta and phi is produced at the current path.
+A .CSV file which contains the computational time for each iteration and samples of theta and phi is produced at the current path.
 }
 \references{
 Liu, F., M. Bayarri, J. Berger, et al. (2009). Modularization in Bayesian Analysis, with Emphasis on Analysis of Computer Models. Bayesian Analysis 4 (1), 119-150.

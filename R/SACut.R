@@ -3,8 +3,8 @@ SACut<-function(pre_values, PhiC,numrun=1000,burnin=500,thin=1, no=1000,acce_pa=
   py <- CutModel$py
   prox <- CutModel$prox
   rprox <- CutModel$rprox
-  denT <- CutModel$denT
-  tranT <- CutModel$tranT
+  denT <- CutModel$proy
+  tranT <- CutModel$rproy
   Z <- CutModel$Z
   Y <- CutModel$Y
   d_x <- CutModel$d_x
@@ -73,7 +73,7 @@ SACut<-function(pre_values, PhiC,numrun=1000,burnin=500,thin=1, no=1000,acce_pa=
       out<-1/(dim(PhiC)[1]-1)*(1-P)
     }else{
       #out<-dtruncnorm(t_n[1],a=-100, b=100,mean = t[1],sd=0.005)*dtruncnorm(t_n[2],a=-1000, b=1000,mean = t[2],sd=0.1)*P        #proposal for t may be changed
-      out<-denT(t_n,t,P)
+      out<-denT(t_n,t)*P
     }
     return(out)
   }

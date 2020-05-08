@@ -8,7 +8,7 @@
  This function combines all probability density and observations involved in the cut distribution. Including two density functions for phi and theta and the observations Z and Y.
 }
 \usage{
-CutModel(px = px, py = py, prox = prox, rprox = rprox, denT = denT, tranT = tranT, Z = Z, Y = Y, d_x = d_x, d_y = d_y, cpp_yes = FALSE, cpp_package = '')
+CutModel(px = px, py = py, prox = prox, rprox = rprox, proy = proy, rproy = rproy, Z = Z, Y = Y, d_x = d_x, d_y = d_y, cpp_yes = FALSE, cpp_package = '')
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -24,11 +24,11 @@ CutModel(px = px, py = py, prox = prox, rprox = rprox, denT = denT, tranT = tran
   \item{rprox}{
     The proposal samling function for phi
   }
-  \item{denT}{
-    The proposal density for theta in the internal chain
+  \item{proy}{
+    The proposal density for theta in the auxiliary chain
   }
-  \item{tranT}{
-    The proposal samling function for theta in the internal chain
+  \item{rproy}{
+    The proposal samling function for theta in the auxiliary chain
   }
   \item{Z}{
     The observations of Z
@@ -43,10 +43,10 @@ CutModel(px = px, py = py, prox = prox, rprox = rprox, denT = denT, tranT = tran
     The dimension of phi
   }
   \item{cpp_yes}{
-    Logic value, indicate if you are using a C code to write density function px and py
+    Logic value, indicate if you are using a C code to write density function px and py and build them within a package XX.
   }
   \item{cpp_package}{
-    If cpp_yes == TRUE, name the cpp package here
+    If cpp_yes == TRUE, name the package XX here.
   }
 }
 \details{
@@ -66,11 +66,11 @@ CutModel(px = px, py = py, prox = prox, rprox = rprox, denT = denT, tranT = tran
   \item{rprox}{
     The proposal samling function for phi
   }
-  \item{denT}{
-    The proposal density for theta in the internal chain
+  \item{proy}{
+    The proposal density for theta in the auxiliary chain
   }
-  \item{tranT}{
-    The proposal samling function for theta in the internal chain
+  \item{rproy}{
+    The proposal samling function for theta in the auxiliary chain
   }
   \item{Z}{
     The observations of Z

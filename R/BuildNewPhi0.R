@@ -3,8 +3,8 @@ BuildNewPhi0<-function(numrun=1000,burnin=500,numsel=100,CutModel){
   py <- CutModel$py
   prox <- CutModel$prox
   rprox <- CutModel$rprox
-  denT <- CutModel$denT
-  tranT <- CutModel$tranT
+  denT <- CutModel$proy
+  tranT <- CutModel$rproy
   Z <- CutModel$Z
   Y <- CutModel$Y
   d_x <- CutModel$d_x
