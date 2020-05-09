@@ -60,7 +60,7 @@ test_that('Plummer2015Example',{
 
   #num_core <- detectCores()
 
-  comenvir <- SACut::ComEnvir(is_Unix = FALSE, core_num = 1, clusterExport = list('py','Y','Npop','dmvnorm'))
+  comenvir <- SACut::ComEnvir(is_Unix = TRUE, core_num = 2, clusterExport = list('py','Y','Npop','dmvnorm'))
 
   expect_true(is.list(comenvir))
 
