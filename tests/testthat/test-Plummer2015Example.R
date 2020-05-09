@@ -58,7 +58,9 @@ test_that('Plummer2015Example',{
 
   expect_true(is.list(cutmodel))
 
-  comenvir <- SACut::ComEnvir(is_Unix = FALSE, core_num = 2, clusterExport = list('py','Y','Npop','dmvnorm'))
+  #num_core <- detectCores()
+
+  comenvir <- SACut::ComEnvir(is_Unix = FALSE, core_num = 1, clusterExport = list('py','Y','Npop','dmvnorm'))
 
   expect_true(is.list(comenvir))
 
