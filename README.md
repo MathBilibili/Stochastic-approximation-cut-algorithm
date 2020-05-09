@@ -51,7 +51,7 @@ where `Z` is the number of people with HPV infection out of a sample of `NPart`,
 
 <img src="https://latex.codecogs.com/gif.latex?Y_i\sim&space;\mathbf{Poisson}(T_i(\exp(\theta_1&plus;\theta_2\varphi_i)))" title="Y_i\sim \mathbf{Poisson}(T_i(\exp(\theta_1+\theta_2\varphi_i)))" />
 
-SACut is applied to prevent the feedback from second module to the estimation of parameter `phi`. The likelihood and prior for first module is loaded:
+SACut is applied to prevent the feedback from second module to the estimation of parameter `phi`. The log-density of the joint distribution (likelihood and prior) for first module is loaded:
 ```r
 px<-function(phi,Z){
     PbZ<-rbind(phi,Z,Npart)
@@ -59,7 +59,7 @@ px<-function(phi,Z){
     return(out)
   }
 ```
-and the likelihood and prior for the second module is loaded:
+and log-density of the joint distribution (likelihood and prior) for the second module is loaded:
 ```r
 py<-function(Y,theta,phi){
     PbY<-rbind(phi,Y,Npop)
@@ -67,7 +67,7 @@ py<-function(Y,theta,phi){
     return(out)
   }
 ```
-We use the truncated normal distribution as the proposal distribution for parameter `phi` and the density and random generation are:
+We use the truncated normal distribution as the proposal distribution for parameter `phi` and the log-density and random generation are:
 ```r
 prox<-function(phi_n,phi){
   out<-sum(log(dtruncnorm(phi_n, a=0, b=1, mean = phi, sd = 0.005))) 
@@ -79,7 +79,7 @@ rprox<-function(phi){
   return(out)
 }
 ```
-In the auxiliary chain, we use the multivariate normal distribution as the proposal distribution for auxiliary parameter `theta` (note that, this is not the parameter `theta` in the main chain), the density and random generation are:
+In the auxiliary chain, we use the multivariate normal distribution as the proposal distribution for auxiliary parameter `theta` (note that, this is not the parameter `theta` in the main chain), the density (not log) and random generation are:
 ```r
 proy<-function(theta_n,theta){
   re<-dmvnorm(as.numeric(theta_n),mean = as.numeric(theta),sigma = matrix(c(0.1648181,-0.3979341,-0.3979341,2.737874),ncol=2,nrow=2)/10)
