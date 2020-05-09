@@ -95,7 +95,7 @@ test_that('Plummer2015Example',{
 
   expect_true(is.data.frame(result))
 
-  expect_equal(dim(result),c(100,20))
+  expect_equal(dim(result),c(90,20))
 
   unlink('Result.csv')
 
