@@ -113,7 +113,7 @@ comenvir <- SACut::ComEnvir(is_Unix = FALSE, core_num = 4, clusterExport = list(
 
 We then load the  existing auxiliary parameter set `phi0` from a `.CSV` file by function `LoadOldPhi0`, the file (`PhiC.csv`) can be download from <https://github.com/MathBilibili/Stochastic-approximation-cut-algorithm/tree/master/Examples/Example3>. Note that, this parameter set can be created by calling function `BuildNewPhi0`.
 ```r
-PhiC <- LoadOldPhi0(filename="PhiC.csv")
+PhiC <- SACut::LoadOldPhi0(filename="PhiC.csv")
 ```
 
 As suggested by [Liang et al. (2016)][Liang2016], the auxiliary chain is conducted solely with sufficient iterations so that it is converged when the main Markov chain (external chain) start to run. Hence, we conduct a preliminary run with 1501000 iterations by calling function `Preliminary_SACut`. The shrink magnitude `no` is set to be large enough to ensure that the auxiliary chain can completely go through every `phi0` before it converges, `acce_pa` is set to be 10 to speed up the convergence. The precision parameter is set to be 3 for `theta_1` and 2 for `theta_2`.
