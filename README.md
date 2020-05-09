@@ -122,9 +122,9 @@ init<-list(theta=c(-2,13),phi=apply(PhiC,MARGIN = 2,median),t=as.matrix(c(-2,13)
 PreRun <- SACut::Preliminary_SACut(init=init, PhiC,numrun=1501000,auxrun=1500000,no=20000,acce_pa=10, sig_dig=c(3,2), CutModel=cutmodel)
 ```
 
-Finally, we are able to run the auxiliary chain and the main chain in parallel by calling the function `SACut`. The result is stored in file `Result.csv`.
+Finally, we are able to run the auxiliary chain and the main chain in parallel by calling the function `SACut`. The total number of iterations is 140000 and we retain only every 100 sample after discarding the first 40000 samples. The result is stored in file `Result.csv`.
 ```r
-SACut::SACut(pre_values=PreRun, PhiC=PhiC,numrun=140000,burnin=0,thin=1, no=20000,acce_pa=10, sig_dig=c(3,2),
+SACut::SACut(pre_values=PreRun, PhiC=PhiC,numrun=140000,burnin=40000,thin=100, no=20000,acce_pa=10, sig_dig=c(3,2),
 filename='Result.csv', Comenvir=comenvir, CutModel=cutmodel)
 ```
 
