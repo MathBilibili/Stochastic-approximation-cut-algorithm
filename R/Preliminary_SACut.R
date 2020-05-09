@@ -270,7 +270,7 @@ Preliminary_SACut<-function(init=list(theta=c(-2,13),phi=rep(1,13),t=as.matrix(c
         print(c(i,InR$t,InR$I,ac_pro))
       }
     }
-    MA_aux_out<-list(Tt=Tt,autheta=sto.autheta.i,Ptau=Ptau,rpt=rpt,log.fenzi_o=log.fenzi_o,log.numr=log.numr,t=H$t,I=H$I,n_trun=n_trun,aux_num_run=num_run,W=W,theta=theta,phi=phi,coin=coin)
+    MA_aux_out<-list(Tt=Tt,autheta=sto.autheta.i,Ptau=Ptau,rpt=rpt,log.fenzi_o=log.fenzi_o,log.numr=log.numr,t=H$t,st.I=st.I,I=H$I,n_trun=n_trun,aux_num_run=num_run,W=W,theta=theta,phi=phi,coin=coin)
     return(MA_aux_out)
   }
 

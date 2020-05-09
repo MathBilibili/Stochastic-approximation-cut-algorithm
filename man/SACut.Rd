@@ -13,7 +13,7 @@ SACut(pre_values, PhiC,numrun=1000,burnin=500,thin=1, no=1000,acce_pa=1, sig_dig
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{pre_values}{
-    The initial condition for the SACut algorithm. It is obtained by running a preliminary chain. Hence, it should be a output from function Preliminary_SACut().
+    The initial condition for the SACut algorithm. It is obtained by running a preliminary chain. Hence, it should be an output from function Preliminary_SACut().
   }
   \item{PhiC}{
     The auxiliary parameter set. It is obtained by calling function LoadNewPhi0() or LoadOldPhi0(). Note that, this should be the same as the PhiC in function Preliminary_SACut().
