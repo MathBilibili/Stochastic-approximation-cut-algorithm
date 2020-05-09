@@ -88,7 +88,7 @@ test_that('Plummer2015Example',{
 
   expect_silent(check_pre_conv(PreRun,PhiC))
 
-  SACut::SACut(pre_values=PreRun, PhiC=PhiC,numrun=100,burnin=0,thin=1, no=10,acce_pa=1, sig_dig=c(3,2),
+  SACut::SACut(pre_values=PreRun, PhiC=PhiC,numrun=100,burnin=10,thin=1, no=10,acce_pa=1, sig_dig=c(3,2),
                filename='Result.csv', Comenvir=comenvir, CutModel=cutmodel)
 
   result <- read.csv('Result.csv')

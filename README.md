@@ -1,5 +1,6 @@
 # SACut: an R package for Stochastic Approximation Cut Algorithm (SACut)
 [![](https://travis-ci.com/MathBilibili/Stochastic-approximation-cut-algorithm.svg?branch=master)](https://travis-ci.com/MathBilibili/Stochastic-approximation-cut-algorithm)
+[![codecov](https://codecov.io/gh/MathBilibili/Stochastic-approximation-cut-algorithm/branch/master/graph/badge.svg)](https://codecov.io/gh/MathBilibili/Stochastic-approximation-cut-algorithm)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 This is an [`R`][R] package to conduct the Stochastic Approximation Cut Algorithm. It also contains code that replicates the results in the paper.

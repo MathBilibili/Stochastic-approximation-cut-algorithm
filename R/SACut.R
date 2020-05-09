@@ -193,20 +193,9 @@ SACut<-function(pre_values, PhiC,numrun=1000,burnin=500,thin=1, no=1000,acce_pa=
           }
           log.fenzi_o<-log.fenzi_n
           ###########
-          if(TRUE){
+
             log.numr.ii<-log.numr
-          }else{
-            log.numr.i<-log.numr-log(rpt)
-            aaa<-quantile(log.numr.i,uuu)
-            bbb<-min(log.numr.i)
-            ccut<-function(x){
-              if(x>aaa){
-                x<-bbb
-              }
-              return(x)
-            }
-            log.numr.ii<-sapply(log.numr.i, ccut)+log(rpt)
-          }
+
           ##########
 
           if(max(log.numr.ii)<300){                                       #scale the density
@@ -229,20 +218,9 @@ SACut<-function(pre_values, PhiC,numrun=1000,burnin=500,thin=1, no=1000,acce_pa=
           log.numr[nchanadd]<-log(bas[2])+py(Y,ColH$t,phi_n)-py(Y,ColH$t,PhiC[bas[1],])
           log.fenzi_o<-log.fenzi_n
           ###########
-          if(TRUE){
+
             log.numr.ii<-log.numr
-          }else{
-            log.numr.i<-log.numr-log(rpt)
-            aaa<-quantile(log.numr.i,uuu)
-            bbb<-min(log.numr.i)
-            ccut<-function(x){
-              if(x>aaa){
-                x<-bbb
-              }
-              return(x)
-            }
-            log.numr.ii<-sapply(log.numr.i, ccut)+log(rpt)
-          }
+
           ##########
 
           if(max(log.numr.ii)<300){                                       #scale the density
@@ -326,20 +304,9 @@ SACut<-function(pre_values, PhiC,numrun=1000,burnin=500,thin=1, no=1000,acce_pa=
           }
           log.fenzi_o<-log.fenzi_n
           ###########
-          if(TRUE){
+
             log.numr.ii<-log.numr
-          }else{
-            log.numr.i<-log.numr-log(rpt)
-            aaa<-quantile(log.numr.i,uuu)
-            bbb<-min(log.numr.i)
-            ccut<-function(x){
-              if(x>aaa){
-                x<-bbb
-              }
-              return(x)
-            }
-            log.numr.ii<-sapply(log.numr.i, ccut)+log(rpt)
-          }
+
           ##########
 
           if(max(log.numr.ii)<300){                                       #scale the density
@@ -363,20 +330,9 @@ SACut<-function(pre_values, PhiC,numrun=1000,burnin=500,thin=1, no=1000,acce_pa=
           log.numr[nchanadd]<-log(bas[2])+py(Y,ColH$t,phi_n)-py(Y,ColH$t,PhiC[bas[1],])
           log.fenzi_o<-log.fenzi_n
           ###########
-          if(TRUE){
+
             log.numr.ii<-log.numr
-          }else{
-            log.numr.i<-log.numr-log(rpt)
-            aaa<-quantile(log.numr.i,uuu)
-            bbb<-min(log.numr.i)
-            ccut<-function(x){
-              if(x>aaa){
-                x<-bbb
-              }
-              return(x)
-            }
-            log.numr.ii<-sapply(log.numr.i, ccut)+log(rpt)
-          }
+
           ##########
 
           if(max(log.numr.ii)<300){                                       #scale the density
