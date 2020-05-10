@@ -58,6 +58,8 @@ BuildNewPhi0<-function(numrun=1000,burnin=500,numsel=100,CutModel){
     Phistan<-Phistar
   }
 
+  if(is.vector(Phistan)){Phistar<-as.matrix(Phistar);Phistan<-as.matrix(Phistan)}
+
   #Max-Min process
   MMP<-function(Phi,num_sel=100){
     if(d_y!=1){
@@ -98,6 +100,6 @@ BuildNewPhi0<-function(numrun=1000,burnin=500,numsel=100,CutModel){
   PhiC<-Phistar[MMP(Phistan,num_sel=numsel),]
 
   #store PhiC for future use
-  write.csv(PhiC,"PhiC.csv",row.names = F)
+  write.table(PhiC,"PhiC.csv",row.names = F,col.names = F,sep = ',')
 
 }

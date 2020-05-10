@@ -189,20 +189,9 @@ Preliminary_SACut<-function(init=list(theta=c(-2,13),phi=rep(1,13),t=as.matrix(c
             log.fenzi_o<-log.fenzi_n
 
             ###########
-            if(TRUE){
+
               log.numr.ii<-log.numr
-            }else{
-              log.numr.i<-log.numr-log(rpt)
-              aaa<-quantile(log.numr.i,uuu)
-              bbb<-min(log.numr.i)
-              ccut<-function(x){
-                if(x>aaa){
-                  x<-bbb
-                }
-                return(x)
-              }
-              log.numr.ii<-sapply(log.numr.i, ccut)+log(rpt)
-            }
+
             ##########
 
             if(max(log.numr.ii)<300){                                       #scale the density
@@ -221,20 +210,9 @@ Preliminary_SACut<-function(init=list(theta=c(-2,13),phi=rep(1,13),t=as.matrix(c
             log.numr[nchanadd]<-log(bas[2])+py(Y,ColH$t,phi_n)-py(Y,ColH$t,PhiC[bas[1],])
             log.fenzi_o<-log.fenzi_n
             ###########
-            if(TRUE){
+
               log.numr.ii<-log.numr
-            }else{
-              log.numr.i<-log.numr-log(rpt)
-              aaa<-quantile(log.numr.i,uuu)
-              bbb<-min(log.numr.i)
-              ccut<-function(x){
-                if(x>aaa){
-                  x<-bbb
-                }
-                return(x)
-              }
-              log.numr.ii<-sapply(log.numr.i, ccut)+log(rpt)
-            }
+
             ##########
 
             if(max(log.numr.ii)<300){                                       #scale the density

@@ -70,7 +70,7 @@ LoadNewPhi0<-function(numsel=100,filename="PhiC.csv",CutModel){
   MMP<-cmpfun(MMP)
 
   #the number of auxiliary \Phi_0 is given by 'num_sel'
-  PhiC<-Phistar[MMP(Phistan,num_sel=numsel),]
+  PhiC<-Phistar[MMP(Phistan,num_sel=numsel),] %>% as.matrix()
 
   return(PhiC)
 

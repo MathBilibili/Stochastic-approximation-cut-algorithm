@@ -366,7 +366,7 @@ SACut<-function(pre_values, PhiC,numrun=1000,burnin=500,thin=1, no=1000,acce_pa=
       }
 
       if(i %in% seq(1000,500000,1000)){
-        Tem_out<-list(phi=sto.phi[1:((i-burn_in)/thin),],aux_phi=sto.auphi[1:((i-burn_in)/thin)],theta=sto.theta[1:((i-burn_in)/thin),],aux_theta=sto.autheta[1:((i-burn_in)/thin),],time=sto.time[1:((i-burn_in)/thin)],Tt=Tt[2,],log.Ptau_fenmu=log.numr-log.fenzi_o)
+        Tem_out<-list(phi=sto.phi[1:((i-burn_in)/thin),],aux_phi=sto.auphi[1:((i-burn_in)/thin)],theta=sto.theta[1:((i-burn_in)/thin),],aux_theta=sto.autheta[1:((i-burn_in)/thin),],time=sto.time[1:((i-burn_in)/thin)],Tt=Tt[1,],log.Ptau_fenmu=log.numr-log.fenzi_o)
         Tem_RR<-data.table(phi= Tem_out$phi,aux_phi= Tem_out$aux_phi,theta= Tem_out$theta,aux_theta= Tem_out$aux_theta,time= Tem_out$time)
         write.csv(Tem_RR,filename)
         print('Record result')
