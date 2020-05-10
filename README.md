@@ -1,9 +1,9 @@
-# SACut: an R package for Stochastic Approximation Cut Algorithm (SACut)
+# SACut: an R package for Stochastic Approximation Cut Algorithm
 [![](https://travis-ci.com/MathBilibili/Stochastic-approximation-cut-algorithm.svg?branch=master)](https://travis-ci.com/MathBilibili/Stochastic-approximation-cut-algorithm)
 [![codecov](https://codecov.io/gh/MathBilibili/Stochastic-approximation-cut-algorithm/branch/master/graph/badge.svg)](https://codecov.io/gh/MathBilibili/Stochastic-approximation-cut-algorithm)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
-This is an [`R`][R] package to conduct the Stochastic Approximation Cut Algorithm. It also contains code that replicates the results in the paper.
+This is an [`R`][R] package to conduct the Stochastic Approximation Cut Algorithm. This repository also contains code that replicates the results in the paper.
 <img align="right" width="200" height="200" src="https://user-images.githubusercontent.com/24710640/81212775-495b2880-8fcd-11ea-9319-52ac4fd15f4f.png">
 
 ## Authors
@@ -12,7 +12,9 @@ Yang Liu and Robert Goudie
 MRC Biostatistics Unit, University of Cambridge
 
 ## Introduction of Stochastic Approximation Cut Algorithm
-The potential effect of partial misspecification of Bayesian modelling is a concern. Recent studies have proposed the idea of modularized models, and the cut model is proposed to prevent feedback of information from the suspect module. This leads to the cut posterior distribution which normally does not have a closed-form. Previous studies have proposed algorithms to sample from this distribution, but these algorithms have unclear theoretical convergence properties. To address this convergence problem, the novel Stochastic Approximation Cut algorithm (SACut) is proposed as an alternative. The algorithm is divided into two parallel chains. The main chain targets an approximation of the cut distribution; the auxiliary chain forms a proposal distribution used in the main chain. We prove convergence of the samples drawn by the proposed algorithm and present the exact limit. Although SACut is biased, since the main chain does not target the exact cut distribution, we prove this bias can be reduced geometrically by increasing a user-chosen tuning parameter. In addition, parallel processing can be easily adopted for SACut, unlike existing algorithms. This greatly reduces computation time.
+Modern Bayesian modelling enables us to accommodate complex forms of data and make comprehensive inference. This facilitates the combination of highly structured models, but the potential effect of misspecification of the model is a concern: by integrating everything into a single model, the posterior distribution of the whole model may be affected even if only one part is not correctly specified. When the model is partially misspecified, recent studies have proposed the idea of modularized models in which the whole model is divided into distinct modules that are linked by Bayes' theorem (e.g. [Lunn et al. (2009)][Lunn2009]; [Liu et al. (2009)][Liu2009]; [Plummer (2015)][Plummer2015]). To prevent non-suspect modules being affected by the suspect modules, the 'cut model' has been proposed to prevent feedback of information from the suspect module. This leads to the 'cut distribution', which replaces the standard posterior. This distribution normally does not have a closed form. Previous studies have proposed algorithms to sample from this distribution, but these algorithms have unclear theoretical convergence properties.
+
+To address this convergence problem, the Stochastic Approximation Cut algorithm (SACut) is proposed to draw samples from the cut distribution. The algorithm is divided into two chains that are run in parallel. The main chain targets an approximation of the cut distribution; the auxiliary chain forms a proposal distribution used in the main chain. The samples drawn by the proposed algorithm satisfy a weak law of large numbers. Although SACut is biased, since the main chain does not target the exact cut distribution, this bias can be reduced geometrically by increasing a user-chosen tuning parameter. In addition, parallel processing can be easily adopted for SACut, unlike existing algorithms. This greatly reduces computation time.
 
 ## Citation
 
@@ -96,7 +98,7 @@ rproy<-function(theta){
 Now we have defined every components of the cut distribution, then call function `CutModel` to build the cut model:
 ```r
 cutmodel <- SACut::CutModel(px = px, py = py, prox = prox, rprox = rprox, proy = proy, rproy = rproy,
-Z = Z, Y = Y, d_x = d_x, d_y = d_y)
+    Z = Z, Y = Y, d_x = d_x, d_y = d_y)
 ```
 Here we do not import `px` and `py` from other package. In the case that they are written and built within other R package for high computational speed:
 ```r
@@ -104,7 +106,7 @@ devtools::install_github('MathBilibili/Stochastic-approximation-cut-algorithm/Ex
 library(Plummer2015Example)
 
 cutmodel <- SACut::CutModel(px = px, py = py, prox = prox, rprox = rprox, proy = proy, rproy = rproy,
-Z = Z, Y = Y, d_x = d_x, d_y = d_y, cpp_yes = TRUE, cpp_package = 'Plummer2015Example')
+    Z = Z, Y = Y, d_x = d_x, d_y = d_y, cpp_yes = TRUE, cpp_package = 'Plummer2015Example')
 ```
 
 After setting the cut model, we set the parallel environment for the computation by function `ComEnvir`. For a Windows device with 4 core, a cluster of `PSOCK` is created. We also need claim the list of variables that are exported to clusters (no need for Linux).
@@ -121,17 +123,20 @@ As suggested by [Liang et al. (2016)][Liang2016], the auxiliary chain is conduct
 ```r
 init<-list(theta=c(-2,13),phi=apply(PhiC,MARGIN = 2,median),t=as.matrix(c(-2,13)),I=1)
 
-PreRun <- SACut::Preliminary_SACut(init=init, PhiC,numrun=1501000,auxrun=1500000,no=20000,acce_pa=10, sig_dig=c(3,2), CutModel=cutmodel)
+PreRun <- SACut::Preliminary_SACut(init=init, PhiC,numrun=1501000,auxrun=1500000,no=20000,acce_pa=10,
+    sig_dig=c(3,2), CutModel=cutmodel)
 ```
 
 Finally, we are able to run the auxiliary chain and the main chain in parallel by calling the function `SACut`. The total number of iterations is 140000 and we retain only every 100 sample after discarding the first 40000 samples. The result is stored in file `Result.csv`.
 ```r
 SACut::SACut(pre_values=PreRun, PhiC=PhiC,numrun=140000,burnin=40000,thin=100, no=20000,acce_pa=10, sig_dig=c(3,2),
-filename='Result.csv', Comenvir=comenvir, CutModel=cutmodel)
+    filename='Result.csv', Comenvir=comenvir, CutModel=cutmodel)
 ```
 
 
 
 [R]: http://www.r-project.org "The R Project for Statistical Computing"
+[Lunn2009]:https://onlinelibrary.wiley.com/doi/10.1002/sim.3680 "The BUGS project: Evolution, critique and future directions"
 [Plummer2015]:https://link.springer.com/article/10.1007/s11222-014-9503-z "Cuts in Bayesian graphical models"
+[Liu2009]:https://projecteuclid.org/euclid.ba/1340370392 "Modularization in Bayesian analysis, with emphasis on analysis of computer models"
 [Liang2016]:https://www.tandfonline.com/doi/full/10.1080/01621459.2015.1009072 "An Adaptive Exchange Algorithm for Sampling From Distributions With Intractable Normalizing Constants"
