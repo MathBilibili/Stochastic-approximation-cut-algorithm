@@ -378,7 +378,7 @@ SACut<-function(pre_values, PhiC,numrun=1000,burnin=500,thin=1, no=1000,acce_pa=
       ac_pro<-coin/(i+InRadd)
 
       if(print_theta==TRUE){
-        cat("\n",c(i,theta))
+        print(c(i,theta))
       }
 
       pb$tick()
