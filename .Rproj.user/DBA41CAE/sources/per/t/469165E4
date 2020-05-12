@@ -5,15 +5,15 @@
     "dirty" : false,
     "encoding" : "UTF-8",
     "folds" : "",
-    "hash" : "2554949395",
+    "hash" : "2065754066",
     "id" : "469165E4",
-    "lastKnownWriteTime" : 1589315862,
-    "last_content_update" : 1589315862392,
+    "lastKnownWriteTime" : 1589317777,
+    "last_content_update" : 1589317777379,
     "path" : "D:/360download/nus_statistics/Cam_biostat/stochastic_approximation_cut/code/git/Stochastic-approximation-cut-algorithm/R/SACut.R",
     "project_path" : "R/SACut.R",
     "properties" : {
-        "cursorPosition" : "0,138",
-        "scrollLine" : "0"
+        "cursorPosition" : "375,30",
+        "scrollLine" : "354"
     },
     "relative_order" : 2,
     "source_on_save" : false,

@@ -28,9 +28,9 @@ Simply download and install the SACut package from Github.
 devtools::install_github('MathBilibili/Stochastic-approximation-cut-algorithm')
 ```
 
-SACut depends on the packages `modeltools`, `flexclust`, `compiler`, `doParallel`, `dplyr`, `tidyr`, and `data.table` which can be installed via:
+SACut depends on the packages `modeltools`, `flexclust`, `compiler`, `doParallel`, `dplyr`, `tidyr`, `progress` and `data.table` which can be installed via:
 ```r
-install.packages(c("modeltools", "flexclust", "compiler", "doParallel", "dplyr", "tidyr", "data.table"))
+install.packages(c("modeltools", "flexclust", "compiler", "doParallel", "dplyr", "tidyr","progress", "data.table"))
 ```
 
 Additionally you may need `truncnorm` and `mvtnorm` to write likelihood or proposal distribution of truncated normal distribution and multivariate normal distribution, and `coda` to assess the convergence of the Markov chain.
@@ -127,10 +127,10 @@ PreRun <- SACut::Preliminary_SACut(init=init, PhiC,numrun=1501000,auxrun=1500000
     sig_dig=c(3,2), CutModel=cutmodel)
 ```
 
-Finally, we are able to run the auxiliary chain and the main chain in parallel by calling the function `SACut`. The total number of iterations is 140000 and we retain only every 100 sample after discarding the first 40000 samples. The result is stored in file `Result.csv`.
+Finally, we are able to run the auxiliary chain and the main chain in parallel by calling the function `SACut`. The total number of iterations is 140000 and we retain only every 100 sample after discarding the first 40000 samples. The result is stored in file `Result.csv` (updated every 1000 iterations).
 ```r
 SACut::SACut(pre_values=PreRun, PhiC=PhiC,numrun=140000,burnin=40000,thin=100, no=20000,acce_pa=10, sig_dig=c(3,2),
-    filename='Result.csv', Comenvir=comenvir, CutModel=cutmodel)
+    filename='Result.csv',storage_step=1000, Comenvir=comenvir, CutModel=cutmodel)
 ```
 
 

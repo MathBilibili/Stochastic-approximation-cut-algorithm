@@ -85,12 +85,12 @@ test_that('SimulationExample',{
 
   expect_true(is.list(PreRun))
 
-  SACut::SACut(pre_values=PreRun, PhiC=PhiC,numrun=1020,burnin=10,thin=1, no=10,acce_pa=1, sig_dig=4,
-               filename='Result.csv', Comenvir=comenvir, CutModel=cutmodel)
+  SACut::SACut(pre_values=PreRun, PhiC=PhiC,numrun=120,burnin=10,thin=1, no=10,acce_pa=1, sig_dig=4,
+               filename='Result.csv', storage_step=10, Comenvir=comenvir, CutModel=cutmodel)
 
   result <- read.csv('Result.csv')
 
-  expect_equal
+  expect_equal(dim(result),c(110,6))
 
   unlink('Result.csv')
 

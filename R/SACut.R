@@ -1,4 +1,4 @@
-SACut<-function(pre_values, PhiC,numrun=1000,burnin=500,thin=1, no=1000,acce_pa=1, sig_dig, filename, storage_step=1000, print_theta=FALSE, Comenvir, CutModel){
+SACut<-function(pre_values, PhiC,numrun=1000,burnin=500,thin=1, no=1000,acce_pa=1, sig_dig, filename, storage_step=10, print_theta=FALSE, Comenvir, CutModel){
   px <- CutModel$px
   py <- CutModel$py
   prox <- CutModel$prox
