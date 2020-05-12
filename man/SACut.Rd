@@ -8,7 +8,7 @@ Function to run the Stochastic Approximation Cut (SACut) algorithm.
 The Stochastic Approximation Cut (SACut) algorithm is proposed to draw samples from the cut distribution discussed in Liu et al. (2009) and Plummer (2015). The algorithm is divided into two parallel chains. The main chain targets an approximation of the cut distribution; the auxiliary chain forms a proposal distribution used in the main chain.
 }
 \usage{
-SACut(pre_values, PhiC,numrun=1000,burnin=500,thin=1, no=1000,acce_pa=1, sig_dig, filename, Comenvir, CutModel)
+SACut(pre_values, PhiC,numrun=1000,burnin=500,thin=1, no=1000,acce_pa=1, sig_dig, filename, storage_step=10, print_theta=FALSE, Comenvir, CutModel)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

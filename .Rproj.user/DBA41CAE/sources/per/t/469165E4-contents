@@ -10,6 +10,7 @@ SACut<-function(pre_values, PhiC,numrun=1000,burnin=500,thin=1, no=1000,acce_pa=
   d_x <- CutModel$d_x
   d_y <- CutModel$d_y
 
+  pb <- progress_bar$new( format = " Sampling [:bar] :percent Estimated complete in :eta", total = numrun, clear = FALSE, width= 100)
 
   uuu<-1
 
@@ -375,9 +376,10 @@ SACut<-function(pre_values, PhiC,numrun=1000,burnin=500,thin=1, no=1000,acce_pa=
       ac_pro<-coin/(i+InRadd)
 
       if(print_theta==TRUE){
-        print(c(i,theta))
+        cat('\n',c(i,theta))
       }
 
+      pb$tick()
 
       #if(sign(rpan<=alfa)==1){
       #  xx<-seq(-2.5,-1,0.005)
