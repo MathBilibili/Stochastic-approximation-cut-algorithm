@@ -1,0 +1,22 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1589314461230.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "2554949395",
+    "id" : "469165E4",
+    "lastKnownWriteTime" : 1589315862,
+    "last_content_update" : 1589315862392,
+    "path" : "D:/360download/nus_statistics/Cam_biostat/stochastic_approximation_cut/code/git/Stochastic-approximation-cut-algorithm/R/SACut.R",
+    "project_path" : "R/SACut.R",
+    "properties" : {
+        "cursorPosition" : "0,138",
+        "scrollLine" : "0"
+    },
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

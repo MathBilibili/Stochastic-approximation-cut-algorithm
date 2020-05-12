@@ -11,6 +11,7 @@ library(doParallel)
 library(dplyr)
 library(tidyr)
 library(data.table)
+library(progress)
 
 test_that('Plummer2015Example',{
   Z <- c(7, 6, 10, 10, 1, 1, 10, 4, 35, 0, 10, 8, 4)
@@ -89,7 +90,7 @@ test_that('Plummer2015Example',{
   expect_silent(check_pre_conv(PreRun,PhiC))
 
   SACut::SACut(pre_values=PreRun, PhiC=PhiC,numrun=100,burnin=10,thin=1, no=10,acce_pa=1, sig_dig=c(3,2),
-               filename='Result.csv', Comenvir=comenvir, CutModel=cutmodel)
+               filename='Result.csv', print_theta=TRUE, Comenvir=comenvir, CutModel=cutmodel)
 
   result <- read.csv('Result.csv')
 

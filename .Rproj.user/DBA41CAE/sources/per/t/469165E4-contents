@@ -1,0 +1,408 @@
+SACut<-function(pre_values, PhiC,numrun=1000,burnin=500,thin=1, no=1000,acce_pa=1, sig_dig, filename, storage_step=1000, print_theta=FALSE, Comenvir, CutModel){
+  px <- CutModel$px
+  py <- CutModel$py
+  prox <- CutModel$prox
+  rprox <- CutModel$rprox
+  denT <- CutModel$proy
+  tranT <- CutModel$rproy
+  Z <- CutModel$Z
+  Y <- CutModel$Y
+  d_x <- CutModel$d_x
+  d_y <- CutModel$d_y
+
+  pb <- progress_bar$new(
+    format = "  Sampling [:bar] :percent Estimated complete in :eta",
+    total = numrun, clear = FALSE, width= 100)
+
+  uuu<-1
+
+  PhiC<-as.matrix(PhiC)
+
+  init<-list(theta=pre_values$theta,phi=pre_values$phi,t=pre_values$t,I=pre_values$I)
+
+  is_Unix <- Comenvir$is_Unix
+  cl <- Comenvir$cl
+
+  #internal invariant distribution
+  p_inv<-function(t,phi,phist,wst){
+    p_inv_inp<-cbind(phist,wst)
+    inp_in<-dim(p_inv_inp)[2]-1
+    psi<-function(x){
+      outtt<-sign(identical(as.vector(x[1:inp_in]),phi))
+      return(outtt)
+    }
+    out<-which(apply(p_inv_inp,MARGIN = 1,FUN=psi)==1)
+    outtt<-as.numeric(py(Y,t,p_inv_inp[out,][1:inp_in])-log(p_inv_inp[out,][inp_in+1]))
+    return(outtt)
+  }
+
+  pro_tp<-function(P,pro_tp_inp){
+    I<-pro_tp_inp$I
+    I_n<-rep(0,length(I))
+    t<-pro_tp_inp$t
+    t_n<-rep(1,d_x)
+    phi<-pro_tp_inp$phi
+    ran<-runif(1,0,1)
+    if(ran<P){
+      coin<-c(1,0)
+      t_n<-tranT(t)
+      out<-list(t=t_n,phi=phi,I=I,coin=coin)
+    }else{
+      coin<-c(0,1)
+      I_n<-sample(seq(1,(dim(PhiC)[1]-1)),1)
+      if(I_n<I){
+        I_n<-I_n
+      }else{
+        I_n<-I_n+1
+      }
+      phi_n<-PhiC[I_n,]
+      out<-list(t=t,phi=phi_n,I=I_n,coin=coin)
+    }
+    return(out)
+  }
+
+  dpro_tp<-function(P,x_n,x){
+    t<-x$t
+    t_n<-x_n$t
+    phi<-x$phi
+    phi_n<-x_n$phi
+    I<-x$I
+    I_n<-x_n$I
+    if(I_n>I){
+      I_n<-I_n-1
+    }else{
+      I_n<-I_n
+    }
+    if(identical(t,t_n)){
+      out<-1/(dim(PhiC)[1]-1)*(1-P)
+    }else{
+      #out<-dtruncnorm(t_n[1],a=-100, b=100,mean = t[1],sd=0.005)*dtruncnorm(t_n[2],a=-1000, b=1000,mean = t[2],sd=0.1)*P        #proposal for t may be changed
+      out<-denT(t_n,t)*P
+    }
+    return(out)
+  }
+
+  MA_in<-function(H,W,n,pai,n_trun){
+    t<-H$t
+    I<-H$I
+    P<-0.75
+    inp<-list(t=t,phi=PhiC[I,],I=I)
+    ou<-pro_tp(P,inp)
+    rate<-p_inv(ou$t,ou$phi,PhiC,W)+log(dpro_tp(P,inp,ou))-p_inv(t,PhiC[I,],PhiC,W)-log(dpro_tp(P,ou,inp))
+    alfa<-min(1,exp(rate))
+    rpan<-runif(1)
+    t_n<-ou$t*sign(rpan<=alfa)+inp$t*sign(rpan>alfa)
+    phi_n<-ou$phi*sign(rpan<=alfa)+inp$phi*sign(rpan>alfa)
+    coin<-ou$coin*sign(rpan<=alfa)+c(0,0)
+    iden<-function(x){
+      Ou<-identical(x,phi_n)
+      return(Ou)
+    }
+    I_n<-which(apply(PhiC,FUN = iden,MARGIN = 1))
+    en<-rep(0,dim(PhiC)[1])
+    en[I_n]<-1
+    W_n<-exp(log(W)+acce_pa*(no/max(no,n))*(en-pai))        #no is n_0
+    if(any(W_n>(10^(250+n_trun)))){
+      W_n<-rep(1,length(W))            #truncated here
+      n_trun<-n_trun+1
+    }
+    out<-list(t=t_n,I=I_n,W=W_n,n_trun=n_trun,coin=coin)
+    return(out)
+  }
+
+  MA_in<-cmpfun(MA_in)
+
+
+  MA_ex<-function(Aux_Tt,init,Z,Y,PhiC,num_run=1000,burn_in=500,thin=1){
+    rpt<-Aux_Tt$rpt
+    theta<-init$theta
+    theta_n<-rep(0,d_x)
+    phi<-init$phi
+    n_trun<-Aux_Tt$n_trun
+    H<-list(t=init$t,I=init$I)
+    W<-Aux_Tt$W
+    coin<-Aux_Tt$coin
+    ColH<-list(t=init$t,I=init$I,w=W[1])      #Comulative information
+    ColH<-ColH
+    pai<-rep(1/length(W),length(W))          # sampling frequency
+    sto.phi<-as.matrix(rep(phi,((num_run-burn_in)/thin))) #note the dimension of phi
+    dim(sto.phi)<-c(((num_run-burn_in)/thin),length(phi))
+    sto.theta<-as.matrix(rep(theta,((num_run-burn_in)/thin))) #note the dimension of theta
+    dim(sto.theta)<-c(((num_run-burn_in)/thin),length(theta))
+    sto.auphi<-rep(0,((num_run-burn_in)/thin)) #note the dimension of phi
+    sto.autheta<-as.matrix(rep(theta,((num_run-burn_in)/thin))) #note the dimension of theta
+    dim(sto.autheta)<-c(((num_run-burn_in)/thin),length(theta))
+    sto.time<-rep(0,((num_run-burn_in)/thin))
+    Tt<-Aux_Tt$Tt
+    Ptau<-Aux_Tt$Ptau
+    log.fenzi_o<-Aux_Tt$log.fenzi_o
+    log.numr<-Aux_Tt$log.numr
+    InRadd<-Aux_Tt$aux_num_run
+    Count_Tt<-dim(Aux_Tt$Tt)[2]
+    if(!is_Unix){
+      clusterExport(cl, Comenvir$clusterExport, envir=environment())
+    }
+    foreach(i = icount(num_run)) %do%{
+      if((i<=burn_in)|(i%%thin!=0)){
+        for(k in 1:1){
+          InR<-MA_in(H,W,n=(((i-1)*1+k)+InRadd),pai,n_trun)
+          W<-InR$W
+          H$t<-InR$t
+          H$I<-InR$I
+          n_trun<-InR$n_trun
+        }
+        coin<-coin+as.numeric(InR$coin)
+
+        ColH$t<-round(InR$t,digits = sig_dig)
+        ColH$I<-InR$I
+        ColH$w<-W[InR$I]
+        #calculate sampling frequency
+        bas<-rbind(ColH$I,ColH$w,ColH$t)
+        Tt<-as.matrix(unique(cbind(Tt,ColH$t),MARGIN=2))
+        phi_n<-rprox(phi)
+
+        log.fenzi<-function(t){
+          return(max(py(Y,t,phi_n),-4000))
+        }
+
+        if(Count_Tt==dim(Tt)[2]){
+          iidentical<-function(x){
+            return(identical(x,as.numeric(ColH$t)))
+          }
+          if(dim(Tt)[2]>1){
+            if(is_Unix){
+              log.fenzi_n<-as.numeric(mclapply(lapply(seq_len(ncol(Tt)), function(i) Tt[, i]),FUN = log.fenzi))
+            }else{
+              clusterExport(cl, list('phi_n'), envir=environment())
+              log.fenzi_n<-parApply(cl,Tt,FUN = log.fenzi,MARGIN = 2)
+            }
+          }else{
+            log.fenzi_n<-py(Y,Tt,phi_n)
+          }
+
+          if(is_Unix){
+            nchan<-which(unlist(mclapply(lapply(seq_len(ncol(Tt)), function(i) Tt[, i]),FUN = iidentical)))
+          }else{
+            clusterExport(cl, list('identical','ColH'),envir=environment())
+            nchan<-which(parApply(cl,Tt,FUN=iidentical,MARGIN = 2))
+          }
+          rpt[nchan]<-rpt[nchan]+1
+          log.numr<-log.numr-log.fenzi_o+log.fenzi_n
+          log.nchanadd<-log(bas[2])+py(Y,ColH$t,phi_n)-py(Y,ColH$t,PhiC[bas[1],])
+          nchanadd<-bas[2]*exp(py(Y,ColH$t,phi_n)-py(Y,ColH$t,PhiC[bas[1],]))
+          if(exp(log.numr[nchan])+exp(log.nchanadd)==0){
+            log.numr[nchan]<-max(log.numr[nchan],log.nchanadd)
+          }else{
+            log.numr[nchan]<-log(exp(log.numr[nchan])+exp(log.nchanadd))
+          }
+          log.fenzi_o<-log.fenzi_n
+          ###########
+
+            log.numr.ii<-log.numr
+
+          ##########
+
+          if(max(log.numr.ii)<300){                                       #scale the density
+            log.numr.scale<-log.numr.ii+(300-max(log.numr.ii))
+          }else{
+            log.numr.scale<-log.numr.ii
+          }
+          deno<-sum(exp(log.numr.scale))
+          Ptau<-exp(log.numr.scale)/deno
+        }else{
+          rpt<-append(rpt,1)
+          if(is_Unix){
+            log.fenzi_n<-as.numeric(mclapply(lapply(seq_len(ncol(Tt)), function(i) Tt[, i]),FUN = log.fenzi))
+          }else{
+            clusterExport(cl, list('phi_n'), envir=environment())
+            log.fenzi_n<-parApply(cl,Tt,FUN = log.fenzi,MARGIN = 2)
+          }
+          nchanadd<-length(log.fenzi_n)
+          log.numr<-log.numr-log.fenzi_o+log.fenzi_n[-nchanadd]
+          log.numr[nchanadd]<-log(bas[2])+py(Y,ColH$t,phi_n)-py(Y,ColH$t,PhiC[bas[1],])
+          log.fenzi_o<-log.fenzi_n
+          ###########
+
+            log.numr.ii<-log.numr
+
+          ##########
+
+          if(max(log.numr.ii)<300){                                       #scale the density
+            log.numr.scale<-log.numr.ii+(300-max(log.numr.ii))
+          }else{
+            log.numr.scale<-log.numr.ii
+          }
+          deno<-sum(exp(log.numr.scale))
+          Ptau<-exp(log.numr.scale)/deno
+        }
+        Count_Tt<-dim(Tt)[2]
+
+        tau_n<-Tt[,sample(x=seq(1,dim(Tt)[2]),size = 1,prob = Ptau)]
+        if(length(tau_n)==1){
+          theta_n<-runif(1,min=tau_n-5*10^(-sig_dig-1),max=tau_n+5*10^(-sig_dig-1))  #uniformly drawing \theta
+        }else{
+          for(q in 1:length(tau_n)){
+            theta_n[q]<-runif(1,min=tau_n[q]-5*10^(-sig_dig[q]-1),max=tau_n[q]+5*10^(-sig_dig[q]-1))
+          }
+        }
+        rate<-px(phi_n,Z)+prox(phi,phi_n)-px(phi,Z)-prox(phi_n,phi)
+        alfa<-min(1,exp(rate))
+        rpan<-runif(1)
+        phi<-phi_n*sign(rpan<=alfa)+phi*sign(rpan>alfa)
+        theta<-theta_n*sign(rpan<=alfa)+theta*sign(rpan>alfa)
+      }else{
+        earlier_time<-Sys.time()
+        for(k in 1:1){
+          InR<-MA_in(H,W,n=(((i-1)*1+k)+InRadd),pai,n_trun)
+          W<-InR$W
+          H$t<-InR$t
+          H$I<-InR$I
+          n_trun<-InR$n_trun
+        }
+        coin<-coin+as.numeric(InR$coin)
+
+        ColH$t<-round(InR$t,digits = sig_dig)
+        ColH$I<-InR$I
+        ColH$w<-W[InR$I]
+
+        sto.auphi[((i-burn_in)/thin)]<-InR$I
+        sto.autheta[((i-burn_in)/thin),]<-ColH$t
+
+        #calculate sampling frequency
+        bas<-rbind(ColH$I,ColH$w,ColH$t)
+        Tt<-as.matrix(unique(cbind(Tt,ColH$t),MARGIN=2))
+        phi_n<-rprox(phi)
+        log.fenzi<-function(t){
+          return(max(py(Y,t,phi_n),-4000))
+        }
+
+        if(Count_Tt==dim(Tt)[2]){
+          iidentical<-function(x){
+            return(identical(x,as.numeric(ColH$t)))
+          }
+          if(dim(Tt)[2]>1){
+            if(is_Unix){
+              log.fenzi_n<-as.numeric(mclapply(lapply(seq_len(ncol(Tt)), function(i) Tt[, i]),FUN = log.fenzi))
+            }else{
+              clusterExport(cl, list('phi_n'), envir=environment())
+              log.fenzi_n<-parApply(cl,Tt,FUN = log.fenzi,MARGIN = 2)
+            }
+          }else{
+            log.fenzi_n<-py(Y,Tt,phi_n)
+          }
+
+          if(is_Unix){
+            nchan<-which(unlist(mclapply(lapply(seq_len(ncol(Tt)), function(i) Tt[, i]),FUN = iidentical)))
+          }else{
+            clusterExport(cl, list('identical','ColH'),envir=environment())
+            nchan<-which(parApply(cl,Tt,FUN=iidentical,MARGIN = 2))
+          }
+          rpt[nchan]<-rpt[nchan]+1
+          log.numr<-log.numr-log.fenzi_o+log.fenzi_n
+          log.nchanadd<-log(bas[2])+py(Y,ColH$t,phi_n)-py(Y,ColH$t,PhiC[bas[1],])
+          nchanadd<-bas[2]*exp(py(Y,ColH$t,phi_n)-py(Y,ColH$t,PhiC[bas[1],]))
+          if(exp(log.numr[nchan])+exp(log.nchanadd)==0){
+            log.numr[nchan]<-max(log.numr[nchan],log.nchanadd)
+          }else{
+            log.numr[nchan]<-log(exp(log.numr[nchan])+exp(log.nchanadd))
+          }
+          log.fenzi_o<-log.fenzi_n
+          ###########
+
+            log.numr.ii<-log.numr
+
+          ##########
+
+          if(max(log.numr.ii)<300){                                       #scale the density
+            log.numr.scale<-log.numr.ii+(300-max(log.numr.ii))
+          }else{
+            log.numr.scale<-log.numr.ii
+          }
+
+          deno<-sum(exp(log.numr.scale))
+          Ptau<-exp(log.numr.scale)/deno
+        }else{
+          rpt<-append(rpt,1)
+          if(is_Unix){
+            log.fenzi_n<-as.numeric(mclapply(lapply(seq_len(ncol(Tt)), function(i) Tt[, i]),FUN = log.fenzi))
+          }else{
+            clusterExport(cl, list('phi_n'), envir=environment())
+            log.fenzi_n<-parApply(cl,Tt,FUN = log.fenzi,MARGIN = 2)
+          }
+          nchanadd<-length(log.fenzi_n)
+          log.numr<-log.numr-log.fenzi_o+log.fenzi_n[-nchanadd]
+          log.numr[nchanadd]<-log(bas[2])+py(Y,ColH$t,phi_n)-py(Y,ColH$t,PhiC[bas[1],])
+          log.fenzi_o<-log.fenzi_n
+          ###########
+
+            log.numr.ii<-log.numr
+
+          ##########
+
+          if(max(log.numr.ii)<300){                                       #scale the density
+            log.numr.scale<-log.numr.ii+(300-max(log.numr.ii))
+          }else{
+            log.numr.scale<-log.numr.ii
+          }
+          deno<-sum(exp(log.numr.scale))
+          Ptau<-exp(log.numr.scale)/deno
+        }
+        Count_Tt<-dim(Tt)[2]
+
+        tau_n<-Tt[,sample(x=seq(1,dim(Tt)[2]),size = 1,prob = Ptau)]
+        if(length(tau_n)==1){
+          theta_n<-runif(1,min=tau_n-5*10^(-sig_dig-1),max=tau_n+5*10^(-sig_dig-1))  #uniformly drawing \theta
+        }else{
+          for(q in 1:length(tau_n)){
+            theta_n[q]<-runif(1,min=tau_n[q]-5*10^(-sig_dig[q]-1),max=tau_n[q]+5*10^(-sig_dig[q]-1))
+          }
+        }
+        rate<-px(phi_n,Z)+prox(phi,phi_n)-px(phi,Z)-prox(phi_n,phi)
+        alfa<-min(1,exp(rate))
+        rpan<-runif(1)
+        phi<-phi_n*sign(rpan<=alfa)+phi*sign(rpan>alfa)
+        theta<-theta_n*sign(rpan<=alfa)+theta*sign(rpan>alfa)
+        sto.phi[((i-burn_in)/thin),]<-phi
+        sto.theta[((i-burn_in)/thin),]<-theta
+        recent_time<-Sys.time()
+        diff_time<-difftime(recent_time,earlier_time,tz="GMT",units="secs")
+        sto.time[((i-burn_in)/thin)]<-diff_time
+      }
+
+      if(i %in% seq(storage_step,numrun,storage_step)){
+        Tem_out<-list(phi=sto.phi[1:((i-burn_in)/thin),],aux_phi=sto.auphi[1:((i-burn_in)/thin)],theta=sto.theta[1:((i-burn_in)/thin),],aux_theta=sto.autheta[1:((i-burn_in)/thin),],time=sto.time[1:((i-burn_in)/thin)],Tt=Tt[1,],log.Ptau_fenmu=log.numr-log.fenzi_o)
+        Tem_RR<-data.table(phi= Tem_out$phi,aux_phi= Tem_out$aux_phi,theta= Tem_out$theta,aux_theta= Tem_out$aux_theta,time= Tem_out$time)
+        write.csv(Tem_RR,filename)
+        print('Record result')
+      }
+      ac_pro<-coin/(i+InRadd)
+
+      if(print_theta==TRUE){
+        cat("\n",c(i,theta))
+      }
+
+      pb$tick()
+      #if(sign(rpan<=alfa)==1){
+      #  xx<-seq(-2.5,-1,0.005)
+      #  yy<-seq(8,23,0.05)
+      #  PP<-rep(0,length(xx)*length(yy))
+      #  dim(PP)<-c(length(xx),length(yy))
+      #  for(s in 1:dim(Tt)[2]){
+      #    PP[which.min(abs(xx-Tt[1,][s])),which.min(abs(yy-Tt[2,][s]))]<-PP[which.min(abs(xx-Tt[1,][s])),which.min(abs(yy-Tt[2,][s]))]+Ptau[s]
+      #  }
+      #  heatmap(PP,Rowv = NA,Colv = NA,scale = 'none')
+      #}
+    }
+    OUT<-list(phi=sto.phi,theta=sto.theta,aux_phi=sto.auphi,aux_theta=sto.autheta,Tt=Tt[1,],Ptau=Ptau,time=sto.time,log.Ptau_fenmu=log.numr-log.fenzi_o)
+    return(OUT)
+  }
+
+  MA_ex<-cmpfun(MA_ex)
+  Result<-MA_ex(pre_values,init,Z,Y,PhiC,num_run=numrun,burn_in=burnin,thin=thin)
+
+  stopCluster(cl)
+
+  RR<-data.table(phi=Result$phi,aux_phi=Result$aux_phi,theta=Result$theta,aux_theta=Result$aux_theta,time=Result$time)
+  write.csv(RR,filename)
+
+}

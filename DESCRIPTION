@@ -20,5 +20,6 @@ Imports:
 	dplyr,
 	testthat,
 	tidyr,
+	progress,
 	data.table
 RoxygenNote: 7.1.0

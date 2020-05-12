@@ -11,6 +11,7 @@ library(doParallel)
 library(dplyr)
 library(tidyr)
 library(data.table)
+library(progress)
 
 ind_var<<-seq(1,50)
 

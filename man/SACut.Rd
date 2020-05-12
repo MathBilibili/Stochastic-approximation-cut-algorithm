@@ -39,6 +39,12 @@ SACut(pre_values, PhiC,numrun=1000,burnin=500,thin=1, no=1000,acce_pa=1, sig_dig
   \item{filename}{
     This is the name of the output file. Note that, it should be a .CSV file (i.e. 'XX.CSV').
   }
+  \item{storage_step}{
+    The output file will be written and updated every 'storage_step' iteration, default is 1000.
+  }
+  \item{print_theta}{
+    If print_theta==TRUE, the sample of theta at each iteration will be printed.
+  }
   \item{Comenvir}{
     This is the parallel computational environment. It should be an output from function ComEnvir().
   }

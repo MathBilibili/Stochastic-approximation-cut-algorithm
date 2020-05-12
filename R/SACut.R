@@ -1,4 +1,4 @@
-SACut<-function(pre_values, PhiC,numrun=1000,burnin=500,thin=1, no=1000,acce_pa=1, sig_dig, filename, Comenvir, CutModel){
+SACut<-function(pre_values, PhiC,numrun=1000,burnin=500,thin=1, no=1000,acce_pa=1, sig_dig, filename, storage_step=1000, print_theta=FALSE, Comenvir, CutModel){
   px <- CutModel$px
   py <- CutModel$py
   prox <- CutModel$prox
@@ -9,6 +9,10 @@ SACut<-function(pre_values, PhiC,numrun=1000,burnin=500,thin=1, no=1000,acce_pa=
   Y <- CutModel$Y
   d_x <- CutModel$d_x
   d_y <- CutModel$d_y
+
+  pb <- progress_bar$new(
+    format = "  Sampling [:bar] :percent Estimated complete in :eta",
+    total = numrun, clear = FALSE, width= 100)
 
   uuu<-1
 
@@ -365,7 +369,7 @@ SACut<-function(pre_values, PhiC,numrun=1000,burnin=500,thin=1, no=1000,acce_pa=
         sto.time[((i-burn_in)/thin)]<-diff_time
       }
 
-      if(i %in% seq(1000,500000,1000)){
+      if(i %in% seq(storage_step,numrun,storage_step)){
         Tem_out<-list(phi=sto.phi[1:((i-burn_in)/thin),],aux_phi=sto.auphi[1:((i-burn_in)/thin)],theta=sto.theta[1:((i-burn_in)/thin),],aux_theta=sto.autheta[1:((i-burn_in)/thin),],time=sto.time[1:((i-burn_in)/thin)],Tt=Tt[1,],log.Ptau_fenmu=log.numr-log.fenzi_o)
         Tem_RR<-data.table(phi= Tem_out$phi,aux_phi= Tem_out$aux_phi,theta= Tem_out$theta,aux_theta= Tem_out$aux_theta,time= Tem_out$time)
         write.csv(Tem_RR,filename)
@@ -373,7 +377,11 @@ SACut<-function(pre_values, PhiC,numrun=1000,burnin=500,thin=1, no=1000,acce_pa=
       }
       ac_pro<-coin/(i+InRadd)
 
-      print(c(i,theta,n_trun,ac_pro))
+      if(print_theta==TRUE){
+        cat("\n",c(i,theta))
+      }
+
+      pb$tick()
       #if(sign(rpan<=alfa)==1){
       #  xx<-seq(-2.5,-1,0.005)
       #  yy<-seq(8,23,0.05)
