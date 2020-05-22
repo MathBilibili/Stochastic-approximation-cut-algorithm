@@ -127,13 +127,22 @@ init<-list(theta=c(-2,13),phi=apply(PhiC,MARGIN = 2,median),t=as.matrix(c(-2,13)
 PreRun <- Preliminary_SACut(init=init, PhiC,numrun=1501000,auxrun=1500000,no=20000,acce_pa=10,
     sig_dig=c(3,2), CutModel=cutmodel)
 ```
+If you simply want to try the code without waiting, you can run following code instead
+```r
+PreRun <- Preliminary_SACut(init=init, PhiC,numrun=250,auxrun=200,no=10,acce_pa=1,
+  sig_dig=c(3,2), CutModel=cutmodel)
+```
 
 Finally, we are able to run the auxiliary chain and the main chain in parallel by calling the function `SACut`. The total number of iterations is 140000 and we retain only every 100 sample after discarding the first 40000 samples. The result is stored in file `Result.csv` (updated every 1000 iterations).
 ```r
 SACut(pre_values=PreRun, PhiC=PhiC,numrun=140000,burnin=40000,thin=100, no=20000,acce_pa=10, sig_dig=c(3,2),
     filename='Result.csv',storage_step=1000, Comenvir=comenvir, CutModel=cutmodel)
 ```
-
+If you simply want to try the code without waiting, you can run following code instead
+```r
+SACut(pre_values=PreRun, PhiC=PhiC,numrun=100,burnin=10,thin=1, no=10,acce_pa=1, sig_dig=c(3,2),
+               filename='Result.csv', print_theta=TRUE, Comenvir=comenvir, CutModel=cutmodel)
+```
 
 
 [R]: http://www.r-project.org "The R Project for Statistical Computing"
