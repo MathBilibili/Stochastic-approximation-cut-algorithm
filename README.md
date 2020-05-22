@@ -26,6 +26,7 @@ Yang Liu, Robert Goudie. Stochastic Approximation Cut Algorithm for Inference in
 Simply download and install the SACut package from Github.
 ```r
 devtools::install_github('MathBilibili/Stochastic-approximation-cut-algorithm')
+library('SACut')
 ```
 
 SACut depends on the packages `modeltools`, `flexclust`, `compiler`, `doParallel`, `dplyr`, `tidyr`, `progress` and `data.table` which can be installed via:
@@ -97,7 +98,7 @@ rproy<-function(theta){
 ```
 Now we have defined every components of the cut distribution, then call function `CutModel` to build the cut model:
 ```r
-cutmodel <- SACut::CutModel(px = px, py = py, prox = prox, rprox = rprox, proy = proy, rproy = rproy,
+cutmodel <- CutModel(px = px, py = py, prox = prox, rprox = rprox, proy = proy, rproy = rproy,
     Z = Z, Y = Y, d_x = d_x, d_y = d_y)
 ```
 Here we do not import `px` and `py` from other package. In the case that they are written and built within other R package for high computational speed:
@@ -105,31 +106,31 @@ Here we do not import `px` and `py` from other package. In the case that they ar
 devtools::install_github('MathBilibili/Stochastic-approximation-cut-algorithm/Examples/Example3/Plummer2015Example/')
 library(Plummer2015Example)
 
-cutmodel <- SACut::CutModel(px = px, py = py, prox = prox, rprox = rprox, proy = proy, rproy = rproy,
+cutmodel <- CutModel(px = px, py = py, prox = prox, rprox = rprox, proy = proy, rproy = rproy,
     Z = Z, Y = Y, d_x = d_x, d_y = d_y, cpp_yes = TRUE, cpp_package = 'Plummer2015Example')
 ```
 
 After setting the cut model, we set the parallel environment for the computation by function `ComEnvir`. For a Windows device with 4 core, a cluster of `PSOCK` is created. We also need claim the list of variables that are exported to clusters (no need for Linux).
 ```r
-comenvir <- SACut::ComEnvir(is_Unix = FALSE, core_num = 4, clusterExport = list('py','Y','Npop','dmvnorm'))
+comenvir <- ComEnvir(is_Unix = FALSE, core_num = 4, clusterExport = list('py','Y','Npop','dmvnorm'))
 ```
 
 We then load the  existing auxiliary parameter set `phi0` from a `.CSV` file by function `LoadOldPhi0`, the file (`PhiC.csv`) can be download from <https://github.com/MathBilibili/Stochastic-approximation-cut-algorithm/tree/master/Examples/Example3>. Note that, this parameter set can be created by calling function `BuildNewPhi0`.
 ```r
-PhiC <- SACut::LoadOldPhi0(filename="PhiC.csv")
+PhiC <- LoadOldPhi0(filename="PhiC.csv")
 ```
 
 As suggested by [Liang et al. (2016)][Liang2016], the auxiliary chain is conducted solely with sufficient iterations so that it is converged when the main Markov chain (external chain) start to run. Hence, we conduct a preliminary run with 1501000 iterations by calling function `Preliminary_SACut`. The shrink magnitude `no` is set to be large enough to ensure that the auxiliary chain can completely go through every `phi0` before it converges, `acce_pa` is set to be 10 to speed up the convergence. The precision parameter is set to be 3 for `theta_1` and 2 for `theta_2`.
 ```r
 init<-list(theta=c(-2,13),phi=apply(PhiC,MARGIN = 2,median),t=as.matrix(c(-2,13)),I=1)
 
-PreRun <- SACut::Preliminary_SACut(init=init, PhiC,numrun=1501000,auxrun=1500000,no=20000,acce_pa=10,
+PreRun <- Preliminary_SACut(init=init, PhiC,numrun=1501000,auxrun=1500000,no=20000,acce_pa=10,
     sig_dig=c(3,2), CutModel=cutmodel)
 ```
 
 Finally, we are able to run the auxiliary chain and the main chain in parallel by calling the function `SACut`. The total number of iterations is 140000 and we retain only every 100 sample after discarding the first 40000 samples. The result is stored in file `Result.csv` (updated every 1000 iterations).
 ```r
-SACut::SACut(pre_values=PreRun, PhiC=PhiC,numrun=140000,burnin=40000,thin=100, no=20000,acce_pa=10, sig_dig=c(3,2),
+SACut(pre_values=PreRun, PhiC=PhiC,numrun=140000,burnin=40000,thin=100, no=20000,acce_pa=10, sig_dig=c(3,2),
     filename='Result.csv',storage_step=1000, Comenvir=comenvir, CutModel=cutmodel)
 ```
 
