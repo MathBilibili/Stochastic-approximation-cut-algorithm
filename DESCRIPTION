@@ -8,18 +8,19 @@ Description: Stochastic Approximation Cut Algorithm
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true
-Imports:
+Depends:
 	modeltools,
 	flexclust,
 	compiler,
-	truncnorm,
-	mvtnorm,
 	foreach,
 	iterators,
 	doParallel,
 	dplyr,
-	testthat,
 	tidyr,
 	progress,
 	data.table
+Imports:
+	testthat,
+	truncnorm,
+	mvtnorm
 RoxygenNote: 7.1.0
