@@ -56,7 +56,7 @@ where `Z` is the number of people with HPV infection out of a sample of `NPart`,
 
 <img src="https://latex.codecogs.com/gif.latex?Y_i\sim&space;\mathbf{Poisson}(T_i(\exp(\theta_1&plus;\theta_2\varphi_i)))" title="Y_i\sim \mathbf{Poisson}(T_i(\exp(\theta_1+\theta_2\varphi_i)))" />
 
-SACut is applied to prevent the feedback from second module to the estimation of parameter `phi`. The log-density of the joint distribution (likelihood and prior) for first module is loaded:
+SACut is applied to prevent the feedback from second module to the estimation of parameter `phi`. At this step, you should define the joint distribution of `phi` and `Z` (first module) according to your task. For this particular demonstration, the log-density of the joint distribution (likelihood and prior) for first module is loaded:
 ```r
 px<-function(phi,Z){
     PbZ<-rbind(phi,Z,Npart)
@@ -64,7 +64,7 @@ px<-function(phi,Z){
     return(out)
   }
 ```
-and log-density of the joint distribution (likelihood and prior) for the second module is loaded:
+You should also define the joint distribution of `Y`, `theta` and `phi` (second module) according to your task. For this particular demonstration, the log-density of the joint distribution (likelihood and prior) for the second module is loaded:
 ```r
 py<-function(Y,theta,phi){
     PbY<-rbind(phi,Y,Npop)
