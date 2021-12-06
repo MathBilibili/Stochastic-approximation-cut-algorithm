@@ -20,7 +20,7 @@ To address this convergence problem, the Stochastic Approximation Cut algorithm 
 
 Please cite the following paper when using SACut:
 
-Liu, Yang and Robert J.B. Goudie. “Stochastic Approximation Cut Algorithm for Inference in Modularized Bayesian Models.” _Statistics and Computing (in press)_ (2021). [Link][Link]
+Liu, Yang and Robert J.B. Goudie. “Stochastic Approximation Cut Algorithm for Inference in Modularized Bayesian Models.” _Statistics and Computing 32, 7 (2022). [Link][Link]
 
 ## Installation
 Simply download and install the SACut package from Github.
